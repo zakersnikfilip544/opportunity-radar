@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 interface HeaderProps {
   title: string;
   subtitle?: string;
+  actions?: React.ReactNode;
 }
 
-export function Header({ title, subtitle }: HeaderProps) {
+export function Header({ title, subtitle, actions }: HeaderProps) {
   const today = formatDate(new Date().toISOString(), "EEEE, MMMM d, yyyy");
 
   return (
@@ -19,6 +20,7 @@ export function Header({ title, subtitle }: HeaderProps) {
         {subtitle && <p className="text-xs text-zinc-500 mt-0.5">{subtitle || today}</p>}
       </div>
       <div className="flex items-center gap-3">
+        {actions}
         <span className="text-xs text-zinc-600">{today}</span>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-4 w-4" />

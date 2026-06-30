@@ -3,105 +3,94 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Radar,
-  LayoutDashboard,
-  Zap,
-  Building2,
-  BookmarkCheck,
-  Search,
-  Calendar,
-  Settings,
-  TrendingUp,
-  Activity,
+  Radar, LayoutDashboard, Zap, Building2,
+  BookmarkCheck, Search, Calendar, Settings, Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils/helpers";
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/opportunities", label: "Opportunities", icon: Zap },
-  { href: "/companies", label: "Companies", icon: Building2 },
-  { href: "/search", label: "Search", icon: Search },
-  { href: "/digest", label: "Daily Digest", icon: Calendar },
-  { href: "/saved", label: "Saved", icon: BookmarkCheck },
-];
-
-const bottomItems = [
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard",      label: "Dashboard",     icon: LayoutDashboard, shortcut: "⌘1", stat: "Overview" },
+  { href: "/opportunities",  label: "Opportunities", icon: Zap,             shortcut: "⌘2", stat: "40 total" },
+  { href: "/companies",      label: "Companies",     icon: Building2,       shortcut: "⌘3", stat: "15 tracked" },
+  { href: "/search",         label: "Search",        icon: Search,          shortcut: "⌘4", stat: "AI-powered" },
+  { href: "/digest",         label: "Daily Digest",  icon: Calendar,        shortcut: "⌘5", stat: "Updated today" },
+  { href: "/saved",          label: "Saved",         icon: BookmarkCheck,   shortcut: "⌘6", stat: "0 saved" },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-60 border-r border-zinc-800 bg-zinc-950 flex flex-col z-30">
+    <aside className="fixed left-0 top-0 h-full w-60 border-r border-zinc-800/80 bg-zinc-950 flex flex-col z-30">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-5 border-b border-zinc-800">
-        <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-radar-500/10 border border-radar-500/30">
-          <Radar className="h-4 w-4 text-radar-400 animate-pulse-radar" />
+      <div className="flex items-center gap-3 px-5 py-[18px] border-b border-zinc-800/80">
+        <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-radar-500/10 border border-radar-500/25">
+          <Radar className="h-4 w-4 text-radar-400" />
+          <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-radar-500 border-2 border-zinc-950" />
         </div>
         <div>
-          <span className="text-sm font-semibold text-white tracking-tight">
-            Opportunity
-          </span>
-          <span className="block text-[10px] font-medium text-radar-400 tracking-widest uppercase">
-            Radar
-          </span>
+          <span className="text-[13px] font-semibold text-white tracking-tight leading-none">Opportunity</span>
+          <span className="block text-[9px] font-semibold text-radar-500 tracking-[0.2em] uppercase mt-0.5">Radar</span>
         </div>
       </div>
 
-      {/* Live indicator */}
-      <div className="px-5 py-3 border-b border-zinc-800">
-        <div className="flex items-center gap-2 text-xs text-zinc-500">
-          <Activity className="h-3 w-3 text-radar-400" />
-          <span>Scanning sources</span>
-          <span className="ml-auto flex h-1.5 w-1.5 rounded-full bg-radar-400 animate-pulse" />
+      {/* Live scanning indicator */}
+      <div className="mx-3 mt-3 mb-1 rounded-lg bg-radar-500/5 border border-radar-500/15 px-3 py-2">
+        <div className="flex items-center gap-2">
+          <Activity className="h-3 w-3 text-radar-400 shrink-0" />
+          <span className="text-[11px] text-zinc-400 font-medium">Scanning 12 sources</span>
+          <span className="ml-auto flex h-1.5 w-1.5 rounded-full bg-radar-400 animate-pulse shrink-0" />
         </div>
+        <p className="text-[10px] text-zinc-600 mt-1 pl-5">Last scan: 2 hours ago</p>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {navItems.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(href + "/");
+      <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
+        {navItems.map(({ href, label, icon: Icon, shortcut, stat }) => {
+          const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href + "/")) || (href === "/dashboard" && pathname === "/dashboard");
           return (
             <Link
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                "group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
                 active
-                  ? "bg-radar-500/10 text-radar-400 border border-radar-500/20"
-                  : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/50"
+                  ? "bg-radar-500/10 text-radar-400 shadow-sm shadow-radar-500/10 ring-1 ring-radar-500/20"
+                  : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/60"
               )}
             >
-              <Icon className="h-4 w-4 flex-shrink-0" />
-              {label}
+              <Icon className={cn("h-4 w-4 shrink-0 transition-colors", active ? "text-radar-400" : "text-zinc-600 group-hover:text-zinc-300")} />
+              <span className="flex-1">{label}</span>
+              {active ? (
+                <span className="text-[10px] text-zinc-600">{stat}</span>
+              ) : (
+                <span className="text-[10px] text-zinc-700 font-mono opacity-0 group-hover:opacity-100 transition-opacity">{shortcut}</span>
+              )}
             </Link>
           );
         })}
       </nav>
 
       {/* Bottom */}
-      <div className="px-3 py-4 border-t border-zinc-800 space-y-0.5">
-        {bottomItems.map(({ href, label, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/50 transition-all"
-          >
-            <Icon className="h-4 w-4 flex-shrink-0" />
-            {label}
-          </Link>
-        ))}
-        <div className="px-3 pt-3">
-          <div className="rounded-lg bg-zinc-900 border border-zinc-800 p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="h-3.5 w-3.5 text-radar-400" />
-              <span className="text-xs font-medium text-zinc-300">MVP Mode</span>
-            </div>
-            <p className="text-[11px] text-zinc-600 leading-relaxed">
-              Scanning 12 sources daily. Upgrade for unlimited access.
-            </p>
+      <div className="border-t border-zinc-800/80 px-3 py-3 space-y-0.5">
+        <Link
+          href="/settings"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/60 transition-all"
+        >
+          <Settings className="h-4 w-4 text-zinc-600" />
+          Settings
+        </Link>
+
+        {/* User */}
+        <div className="flex items-center gap-3 px-3 py-3 mt-1 rounded-lg bg-zinc-900/50 border border-zinc-800">
+          <div className="h-7 w-7 rounded-full bg-gradient-to-br from-radar-500 to-violet-600 flex items-center justify-center text-[11px] font-bold text-white shrink-0">
+            U
           </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-zinc-200 truncate">Demo User</p>
+            <p className="text-[10px] text-zinc-600 truncate">demo mode active</p>
+          </div>
+          <span className="h-2 w-2 rounded-full bg-radar-500 shrink-0" title="Online" />
         </div>
       </div>
     </aside>
