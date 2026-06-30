@@ -71,7 +71,7 @@ export function FilterPanel({ filters, onChange }: FilterPanelProps) {
       </Button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl z-50 p-4 space-y-4">
+        <div className="fixed inset-x-4 top-20 sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80 max-h-[75vh] sm:max-h-none overflow-y-auto rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl z-50 p-4 space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold text-zinc-200">Filters</span>
             <div className="flex items-center gap-2">

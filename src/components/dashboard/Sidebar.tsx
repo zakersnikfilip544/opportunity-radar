@@ -4,9 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Radar, LayoutDashboard, Zap, Building2,
-  BookmarkCheck, Search, Calendar, Settings, Activity,
+  BookmarkCheck, Search, Calendar, Settings, Activity, X,
 } from "lucide-react";
 import { cn } from "@/lib/utils/helpers";
+import { useSidebar } from "./SidebarContext";
 
 const navItems = [
   { href: "/dashboard",      label: "Dashboard",     icon: LayoutDashboard, shortcut: "⌘1", stat: "Overview" },
@@ -19,19 +20,44 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { open, close } = useSidebar();
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-60 border-r border-zinc-800/80 bg-zinc-950 flex flex-col z-30">
+    <>
+      {/* Mobile/tablet backdrop */}
+      {open && (
+        <div
+          onClick={close}
+          className="fixed inset-0 bg-black/60 z-30 lg:hidden"
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={cn(
+          "fixed left-0 top-0 h-full w-60 border-r border-zinc-800/80 bg-zinc-950 flex flex-col z-40",
+          "transition-transform duration-200 ease-out",
+          "lg:translate-x-0",
+          open ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-[18px] border-b border-zinc-800/80">
         <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-radar-500/10 border border-radar-500/25">
           <Radar className="h-4 w-4 text-radar-400" />
           <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-radar-500 border-2 border-zinc-950" />
         </div>
-        <div>
+        <div className="flex-1">
           <span className="text-[13px] font-semibold text-white tracking-tight leading-none">Opportunity</span>
           <span className="block text-[9px] font-semibold text-radar-500 tracking-[0.2em] uppercase mt-0.5">Radar</span>
         </div>
+        <button
+          onClick={close}
+          className="lg:hidden flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/60 transition-colors"
+          aria-label="Close menu"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
 
       {/* Live scanning indicator */}
@@ -52,8 +78,9 @@ export function Sidebar() {
             <Link
               key={href}
               href={href}
+              onClick={close}
               className={cn(
-                "group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+                "group flex items-center gap-3 px-3 py-3 lg:py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
                 active
                   ? "bg-radar-500/10 text-radar-400 shadow-sm shadow-radar-500/10 ring-1 ring-radar-500/20"
                   : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/60"
@@ -75,7 +102,8 @@ export function Sidebar() {
       <div className="border-t border-zinc-800/80 px-3 py-3 space-y-0.5">
         <Link
           href="/settings"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/60 transition-all"
+          onClick={close}
+          className="flex items-center gap-3 px-3 py-3 lg:py-2.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/60 transition-all"
         >
           <Settings className="h-4 w-4 text-zinc-600" />
           Settings
@@ -93,6 +121,7 @@ export function Sidebar() {
           <span className="h-2 w-2 rounded-full bg-radar-500 shrink-0" title="Online" />
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

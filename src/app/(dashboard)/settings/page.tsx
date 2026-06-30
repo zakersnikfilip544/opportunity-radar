@@ -32,7 +32,7 @@ export default function SettingsPage() {
     <div>
       <Header title="Settings" subtitle="Configure your Opportunity Radar" />
 
-      <div className="px-8 py-6 max-w-4xl space-y-6">
+      <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-4xl space-y-6">
         {/* API Keys */}
         <Card>
           <CardHeader>
@@ -44,13 +44,15 @@ export default function SettingsPage() {
           <CardContent className="space-y-4">
             <div>
               <label className="block text-xs text-zinc-500 mb-1.5">OpenAI API Key</label>
-              <div className="flex gap-2">
-                <Input
-                  type="password"
-                  placeholder="sk-..."
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                />
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex-1 min-w-0">
+                  <Input
+                    type="password"
+                    placeholder="sk-..."
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                  />
+                </div>
                 <Button variant="secondary" size="md" onClick={() => toast.success("Saved to environment")}>
                   Save
                 </Button>
@@ -59,13 +61,15 @@ export default function SettingsPage() {
             </div>
             <div>
               <label className="block text-xs text-zinc-500 mb-1.5">Cron Secret</label>
-              <div className="flex gap-2">
-                <Input
-                  type="password"
-                  placeholder="your-secret"
-                  value={cronSecret}
-                  onChange={(e) => setCronSecret(e.target.value)}
-                />
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex-1 min-w-0">
+                  <Input
+                    type="password"
+                    placeholder="your-secret"
+                    value={cronSecret}
+                    onChange={(e) => setCronSecret(e.target.value)}
+                  />
+                </div>
                 <Button variant="secondary" size="md" onClick={() => toast.success("Saved")}>
                   Save
                 </Button>
@@ -121,14 +125,14 @@ export default function SettingsPage() {
           <CardContent className="space-y-3">
             <div className="rounded-lg bg-zinc-800/50 border border-zinc-700 p-4">
               <p className="text-xs text-zinc-400 font-medium mb-2">Recommended cron setup (add to crontab or Vercel Cron):</p>
-              <code className="text-xs text-radar-400 font-mono">
+              <code className="block text-xs text-radar-400 font-mono whitespace-pre-wrap break-all">
                 0 */2 * * * curl -X POST https://your-domain/api/scrape -H "Authorization: Bearer $CRON_SECRET"
               </code>
               <p className="text-xs text-zinc-600 mt-2">Scrapes all sources every 2 hours.</p>
             </div>
             <div className="rounded-lg bg-zinc-800/50 border border-zinc-700 p-4">
               <p className="text-xs text-zinc-400 font-medium mb-2">Daily digest (run at 7 AM):</p>
-              <code className="text-xs text-yellow-400 font-mono">
+              <code className="block text-xs text-yellow-400 font-mono whitespace-pre-wrap break-all">
                 0 7 * * * curl -X POST https://your-domain/api/digest -H "Authorization: Bearer $CRON_SECRET"
               </code>
             </div>

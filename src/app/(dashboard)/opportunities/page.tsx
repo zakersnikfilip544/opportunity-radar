@@ -118,10 +118,10 @@ function OpportunitiesContent() {
         subtitle={loading ? "Loading..." : `${data?.total ?? 0} opportunities`}
       />
 
-      <div className="px-8 py-6 space-y-5 max-w-7xl">
+      <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5 max-w-7xl">
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex-1 min-w-56">
+          <div className="w-full sm:w-auto sm:flex-1 sm:min-w-56">
             <SearchBar
               inline
               onSearch={(q) => setFilters((f) => ({ ...f, search: q, page: 1 }))}
@@ -131,7 +131,7 @@ function OpportunitiesContent() {
           <select
             value={filters.sort_by ?? "published_at"}
             onChange={(e) => setFilters((f) => ({ ...f, sort_by: e.target.value as OpportunityFilters["sort_by"], page: 1 }))}
-            className="rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-zinc-600"
+            className="rounded-lg border border-zinc-700 bg-zinc-800 px-3 h-11 sm:h-9 text-sm text-zinc-300 focus:outline-none focus:border-zinc-600"
           >
             {SORT_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
@@ -141,13 +141,13 @@ function OpportunitiesContent() {
           <div className="flex rounded-lg border border-zinc-700 overflow-hidden">
             <button
               onClick={() => setView("grid")}
-              className={cn("p-2 transition-colors", view === "grid" ? "bg-zinc-700 text-white" : "text-zinc-500 hover:text-zinc-300")}
+              className={cn("h-11 w-11 sm:h-9 sm:w-9 flex items-center justify-center transition-colors", view === "grid" ? "bg-zinc-700 text-white" : "text-zinc-500 hover:text-zinc-300")}
             >
               <LayoutGrid className="h-4 w-4" />
             </button>
             <button
               onClick={() => setView("list")}
-              className={cn("p-2 transition-colors", view === "list" ? "bg-zinc-700 text-white" : "text-zinc-500 hover:text-zinc-300")}
+              className={cn("h-11 w-11 sm:h-9 sm:w-9 flex items-center justify-center transition-colors", view === "list" ? "bg-zinc-700 text-white" : "text-zinc-500 hover:text-zinc-300")}
             >
               <List className="h-4 w-4" />
             </button>

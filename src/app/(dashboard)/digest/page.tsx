@@ -69,7 +69,7 @@ export default function DigestPage() {
         }
       />
 
-      <div className="px-8 py-6 max-w-5xl space-y-8">
+      <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-5xl space-y-8">
         {loading ? (
           <div className="space-y-4">
             <CardSkeleton />
@@ -94,7 +94,7 @@ export default function DigestPage() {
         ) : (
           <>
             {/* Header summary card */}
-            <div className="relative rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900/80 to-zinc-950 p-6 overflow-hidden">
+            <div className="relative rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900/80 to-zinc-950 p-4 sm:p-6 overflow-hidden">
               <div className="absolute top-0 right-0 w-72 h-72 bg-radar-500/5 rounded-full blur-3xl pointer-events-none" />
               <div className="relative">
                 <div className="flex items-center gap-2 mb-3">
@@ -103,31 +103,31 @@ export default function DigestPage() {
                     Executive Intelligence Briefing
                   </span>
                 </div>
-                <h1 className="text-2xl font-bold text-white mb-3 leading-tight">{digest.title}</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-white mb-3 leading-tight">{digest.title}</h1>
                 {digest.summary && (
                   <p className="text-sm text-zinc-400 leading-relaxed max-w-2xl">{digest.summary}</p>
                 )}
 
                 {/* KPIs */}
                 {digest.stats && (
-                  <div className="mt-6 pt-5 border-t border-zinc-800/60 grid grid-cols-3 gap-6">
+                  <div className="mt-6 pt-5 border-t border-zinc-800/60 grid grid-cols-3 gap-3 sm:gap-6">
                     <div>
-                      <div className="text-3xl font-bold text-radar-400 mb-1">
+                      <div className="text-xl sm:text-3xl font-bold text-radar-400 mb-1">
                         {digest.stats.total_opportunities}
                       </div>
-                      <div className="text-xs text-zinc-600 uppercase tracking-wider">Opportunities</div>
+                      <div className="text-[10px] sm:text-xs text-zinc-600 uppercase tracking-wider">Opportunities</div>
                     </div>
                     <div>
-                      <div className="text-3xl font-bold text-yellow-400 mb-1">
+                      <div className="text-xl sm:text-3xl font-bold text-yellow-400 mb-1">
                         {digest.stats.avg_opportunity_score}
                       </div>
-                      <div className="text-xs text-zinc-600 uppercase tracking-wider">Avg Score</div>
+                      <div className="text-[10px] sm:text-xs text-zinc-600 uppercase tracking-wider">Avg Score</div>
                     </div>
                     <div>
-                      <div className="text-3xl font-bold text-orange-400 mb-1">
+                      <div className="text-xl sm:text-3xl font-bold text-orange-400 mb-1">
                         {digest.stats.high_urgency_count ?? 0}
                       </div>
-                      <div className="text-xs text-zinc-600 uppercase tracking-wider">High Urgency</div>
+                      <div className="text-[10px] sm:text-xs text-zinc-600 uppercase tracking-wider">High Urgency</div>
                     </div>
                   </div>
                 )}

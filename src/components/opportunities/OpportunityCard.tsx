@@ -113,7 +113,7 @@ export function OpportunityCard({ opportunity: opp, saved, onSave, compact }: Op
             {onSave && (
               <button
                 onClick={(e) => { e.preventDefault(); onSave(opp.id); }}
-                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300"
+                className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity p-2 -m-1 rounded-md hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300"
               >
                 {saved
                   ? <BookmarkCheck className="h-3.5 w-3.5 text-radar-400" />

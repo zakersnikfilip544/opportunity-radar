@@ -54,7 +54,7 @@ export default function CompanyPage() {
     return (
       <div className="min-h-screen bg-zinc-950">
         <Header title="Company" />
-        <div className="px-8 py-6 grid md:grid-cols-3 gap-6 max-w-6xl">
+        <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 grid md:grid-cols-3 gap-6 max-w-6xl">
           <CardSkeleton />
           <div className="md:col-span-2 space-y-4">
             <CardSkeleton />
@@ -69,7 +69,7 @@ export default function CompanyPage() {
     return (
       <div className="min-h-screen bg-zinc-950">
         <Header title="Not Found" />
-        <div className="px-8 py-20 text-center">
+        <div className="px-4 sm:px-8 py-20 text-center">
           <Building2 className="h-10 w-10 text-zinc-700 mx-auto mb-4" />
           <p className="text-sm text-zinc-500 mb-4">Company not found.</p>
           <Link href="/companies" className="text-radar-400 text-sm hover:text-radar-300">← Back to companies</Link>
@@ -98,7 +98,7 @@ export default function CompanyPage() {
     <div className="min-h-screen bg-zinc-950">
       <Header title={company.name} subtitle={company.industry ?? "Company"} />
 
-      <div className="px-8 py-6 max-w-6xl space-y-6">
+      <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-6xl space-y-6">
         <Link href="/companies" className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-200 transition-colors">
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to companies

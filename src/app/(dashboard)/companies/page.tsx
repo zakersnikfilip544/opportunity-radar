@@ -43,7 +43,7 @@ export default function CompaniesPage() {
         subtitle={`${data?.total || 0} companies tracked`}
       />
 
-      <div className="px-8 py-6 space-y-6 max-w-7xl">
+      <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6 max-w-7xl">
         <div className="max-w-md">
           <Input
             icon={<Search className="h-4 w-4" />}

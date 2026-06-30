@@ -54,12 +54,12 @@ export default function DashboardPage() {
         subtitle="AI-powered business opportunity radar"
       />
 
-      <div className="px-8 py-6 space-y-6 max-w-[1400px]">
+      <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5 sm:space-y-6 max-w-[1400px]">
         {/* Demo mode banner */}
         {showBanner && (
-          <div className="flex items-center gap-3 rounded-xl border border-yellow-500/20 bg-yellow-500/5 px-4 py-3">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 rounded-xl border border-yellow-500/20 bg-yellow-500/5 px-4 py-3">
             <Database className="h-4 w-4 text-yellow-400 shrink-0" />
-            <p className="text-sm text-zinc-300 flex-1">
+            <p className="text-sm text-zinc-300 flex-1 min-w-[200px]">
               <span className="font-medium text-yellow-400">Demo mode active</span>
               {" — "} showing 40 sample opportunities. Connect Supabase to enable live data ingestion.
             </p>
@@ -78,7 +78,7 @@ export default function DashboardPage() {
         )}
 
         {/* Search */}
-        <div className="relative rounded-xl border border-zinc-800 bg-gradient-to-r from-zinc-900 via-zinc-900/80 to-zinc-950 p-5 overflow-hidden">
+        <div className="relative rounded-xl border border-zinc-800 bg-gradient-to-r from-zinc-900 via-zinc-900/80 to-zinc-950 p-4 sm:p-5 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-radar-500/5 to-violet-500/5 pointer-events-none" />
           <div className="relative">
             <div className="flex items-center gap-2 mb-3">
@@ -113,7 +113,7 @@ export default function DashboardPage() {
 
         {/* Row 5: Top opportunities by score */}
         <section>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <div>
               <h2 className="text-sm font-semibold text-zinc-200">Highest-Scored Opportunities</h2>
               <p className="text-xs text-zinc-600 mt-0.5">Best opportunities by AI score</p>
@@ -140,7 +140,7 @@ export default function DashboardPage() {
 
         {/* Row 6: Most urgent */}
         <section>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <div>
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-orange-400" />

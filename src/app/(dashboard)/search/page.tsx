@@ -54,7 +54,7 @@ function SearchPageContent() {
         subtitle="Natural language business intelligence search"
       />
 
-      <div className="px-8 py-8 max-w-5xl space-y-8">
+      <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-8 max-w-5xl space-y-8">
         {/* Hero search */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">

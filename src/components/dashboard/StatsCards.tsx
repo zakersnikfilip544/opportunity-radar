@@ -27,7 +27,7 @@ function StatCard({ label, value, sub, trend, trendUp = true, icon: Icon, accent
   return (
     <div
       className={cn(
-        "relative rounded-xl border p-5 overflow-hidden transition-all duration-200",
+        "relative rounded-xl border p-4 sm:p-5 overflow-hidden transition-all duration-200",
         "bg-zinc-900/60 backdrop-blur-sm",
         borderColor,
         "hover:shadow-lg hover:-translate-y-0.5"
@@ -38,17 +38,17 @@ function StatCard({ label, value, sub, trend, trendUp = true, icon: Icon, accent
 
       <div className="relative">
         {/* Top row */}
-        <div className="flex items-start justify-between mb-4">
+        <div className="flex items-start justify-between mb-3 sm:mb-4">
           <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest leading-none">
             {label}
           </span>
-          <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center", iconBg)}>
+          <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center shrink-0", iconBg)}>
             <Icon className={cn("h-3.5 w-3.5", accentColor)} />
           </div>
         </div>
 
         {/* Value */}
-        <div className={cn("text-4xl font-bold tracking-tight mb-1", accentColor)}>
+        <div className={cn("text-3xl sm:text-4xl font-bold tracking-tight mb-1", accentColor)}>
           {value}
         </div>
 
@@ -72,7 +72,7 @@ function StatCard({ label, value, sub, trend, trendUp = true, icon: Icon, accent
 export function StatsCards({ stats, loading }: StatsCardsProps) {
   if (loading) {
     return (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => <StatSkeleton key={i} />)}
       </div>
     );
@@ -130,7 +130,7 @@ export function StatsCards({ stats, loading }: StatsCardsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {cards.map((card) => <StatCard key={card.label} {...card} />)}
     </div>
   );

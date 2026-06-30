@@ -79,8 +79,8 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave }: Opportuni
       </Link>
 
       {/* Hero */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-        <div className="flex items-start justify-between gap-4 mb-4">
+      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
           <div className="flex items-center gap-2 flex-wrap">
             <span
               className={cn(
@@ -97,7 +97,7 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave }: Opportuni
               <Badge variant="success" size="sm">✓ Verified</Badge>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {onSave && (
               <Button variant="outline" size="sm" onClick={onSave}>
                 {saved ? (
@@ -117,7 +117,7 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave }: Opportuni
           </div>
         </div>
 
-        <h1 className="text-xl font-bold text-white mb-3 leading-tight">{opp.title}</h1>
+        <h1 className="text-lg sm:text-xl font-bold text-white mb-3 leading-tight">{opp.title}</h1>
         <p className="text-sm text-zinc-400 leading-relaxed mb-4">{opp.summary}</p>
 
         {/* Meta */}
@@ -164,9 +164,9 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave }: Opportuni
       </div>
 
       {/* Scores */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {scores.map((s) => (
-          <Card key={s.label} className="p-4 flex flex-col items-center gap-2">
+          <Card key={s.label} className="p-3 sm:p-4 flex flex-col items-center gap-2">
             <ScoreRing score={s.value} size="sm" />
             <span className="text-xs text-zinc-500 text-center">{s.label}</span>
           </Card>
@@ -180,7 +180,7 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave }: Opportuni
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={cn(
-              "flex-1 rounded-md px-4 py-2 text-sm font-medium capitalize transition-all",
+              "flex-1 rounded-md px-2 sm:px-4 py-3 sm:py-2 text-sm font-medium capitalize transition-all",
               activeTab === tab
                 ? "bg-zinc-800 text-white shadow-sm"
                 : "text-zinc-500 hover:text-zinc-300"
