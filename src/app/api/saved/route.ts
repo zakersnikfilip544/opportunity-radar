@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest) {
-  const supabase = createAdminClient();
   const { searchParams } = req.nextUrl;
   const userId = searchParams.get("user_id");
   if (!userId) return NextResponse.json({ error: "user_id required" }, { status: 400 });
+  if (!isSupabaseConfigured()) return NextResponse.json([]);
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from("saved_opportunities")
@@ -18,6 +19,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  if (!isSupabaseConfigured()) return NextResponse.json({ error: "Database not configured" }, { status: 503 });
   const supabase = createAdminClient();
   const { user_id, opportunity_id, notes, tags } = await req.json();
 
@@ -36,6 +38,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  if (!isSupabaseConfigured()) return NextResponse.json({ error: "Database not configured" }, { status: 503 });
   const supabase = createAdminClient();
   const { searchParams } = req.nextUrl;
   const userId = searchParams.get("user_id");

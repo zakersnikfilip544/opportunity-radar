@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { generateDigestSummary } from "@/lib/openai/analyzer";
 import { format } from "date-fns";
 
 export async function GET(req: NextRequest) {
+  if (!isSupabaseConfigured()) return NextResponse.json({ error: "Digest not found" }, { status: 404 });
   const supabase = createAdminClient();
   const { searchParams } = req.nextUrl;
   const dateParam = searchParams.get("date") || format(new Date(), "yyyy-MM-dd");

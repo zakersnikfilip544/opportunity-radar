@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { parseNaturalLanguageSearch } from "@/lib/openai/analyzer";
 
 export async function GET(req: NextRequest) {
@@ -8,6 +8,10 @@ export async function GET(req: NextRequest) {
 
   if (!query || query.trim().length < 2) {
     return NextResponse.json({ error: "Query too short" }, { status: 400 });
+  }
+
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json({ data: [], filters: null, query });
   }
 
   const supabase = createAdminClient();

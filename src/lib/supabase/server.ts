@@ -26,6 +26,11 @@ export async function createClient() {
   );
 }
 
+export function isSupabaseConfigured(): boolean {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  return url.startsWith("https://") && !url.includes("placeholder");
+}
+
 export function createAdminClient() {
   const { createClient } = require("@supabase/supabase-js");
   return createClient(

@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { scrapeAllSources, scrapeSource } from "@/lib/scrapers";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import type { Source } from "@/types";
 
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json({ error: "Database not configured" }, { status: 503 });
   }
 
   const body = await req.json().catch(() => ({}));

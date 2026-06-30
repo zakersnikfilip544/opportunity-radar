@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import type { OpportunityFilters } from "@/types";
 
-export async function GET(req: NextRequest) {
-  const supabase = createAdminClient();
-  const { searchParams } = req.nextUrl;
+const EMPTY_PAGE = (page: number, per_page: number) =>
+  NextResponse.json({ data: [], total: 0, page, per_page, total_pages: 0 });
 
+export async function GET(req: NextRequest) {
+  const { searchParams } = req.nextUrl;
   const page = parseInt(searchParams.get("page") || "1");
   const per_page = Math.min(parseInt(searchParams.get("per_page") || "20"), 100);
+
+  if (!isSupabaseConfigured()) return EMPTY_PAGE(page, per_page);
+
+  const supabase = createAdminClient();
   const offset = (page - 1) * per_page;
 
   const types = searchParams.getAll("type");

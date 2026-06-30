@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest) {
-  const supabase = createAdminClient();
   const { searchParams } = req.nextUrl;
-
   const page = parseInt(searchParams.get("page") || "1");
   const per_page = Math.min(parseInt(searchParams.get("per_page") || "20"), 100);
+
+  if (!isSupabaseConfigured())
+    return NextResponse.json({ data: [], total: 0, page, per_page, total_pages: 0 });
+
+  const supabase = createAdminClient();
   const offset = (page - 1) * per_page;
   const search = searchParams.get("search");
   const country = searchParams.get("country");
