@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { parseNaturalLanguageSearch } from "@/lib/openai/analyzer";
+import { searchMockOpportunities } from "@/lib/mock";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -11,7 +12,7 @@ export async function GET(req: NextRequest) {
   }
 
   if (!isSupabaseConfigured()) {
-    return NextResponse.json({ data: [], filters: null, query });
+    return NextResponse.json({ data: searchMockOpportunities(query), filters: null, query });
   }
 
   const supabase = createAdminClient();

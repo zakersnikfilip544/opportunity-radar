@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
-
-const EMPTY_STATS = {
-  total_opportunities: 0, today_opportunities: 0, high_urgency: 0,
-  avg_score: 0, by_type: [], by_country: [], timeline: [], top_industries: [],
-};
+import { getMockStats } from "@/lib/mock";
 
 export async function GET() {
-  if (!isSupabaseConfigured()) return NextResponse.json(EMPTY_STATS);
+  if (!isSupabaseConfigured()) return NextResponse.json(getMockStats());
+
   const supabase = createAdminClient();
 
   const now = new Date();

@@ -1,15 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { getMockCompany } from "@/lib/mock";
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  if (!isSupabaseConfigured()) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  if (!isSupabaseConfigured()) {
+    const result = getMockCompany(id);
+    if (!result) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json(result);
+  }
+
   const supabase = createAdminClient();
 
-  // Support both UUID and slug
   const isUUID = /^[0-9a-f-]{36}$/.test(id);
   const query = supabase.from("companies").select("*");
   const { data: company, error } = isUUID
@@ -20,7 +26,6 @@ export async function GET(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  // Get company opportunities
   const { data: opportunities } = await supabase
     .from("opportunities")
     .select("id, title, type, summary, opportunity_score, urgency, published_at, tags")
@@ -28,7 +33,6 @@ export async function GET(
     .order("published_at", { ascending: false })
     .limit(20);
 
-  // Get company timeline
   const { data: events } = await supabase
     .from("company_events")
     .select("*")

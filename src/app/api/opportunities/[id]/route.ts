@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { getMockOpportunity } from "@/lib/mock";
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  if (!isSupabaseConfigured()) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  if (!isSupabaseConfigured()) {
+    const opp = getMockOpportunity(id);
+    if (!opp) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json(opp);
+  }
+
   const supabase = createAdminClient();
 
   const { data, error } = await supabase
@@ -19,7 +26,6 @@ export async function GET(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  // Increment view count
   await supabase
     .from("opportunities")
     .update({ view_count: (data.view_count || 0) + 1 })

@@ -1,16 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
-import type { OpportunityFilters } from "@/types";
-
-const EMPTY_PAGE = (page: number, per_page: number) =>
-  NextResponse.json({ data: [], total: 0, page, per_page, total_pages: 0 });
+import { getMockOpportunities } from "@/lib/mock";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const page = parseInt(searchParams.get("page") || "1");
   const per_page = Math.min(parseInt(searchParams.get("per_page") || "20"), 100);
 
-  if (!isSupabaseConfigured()) return EMPTY_PAGE(page, per_page);
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json(
+      getMockOpportunities({
+        page,
+        per_page,
+        sort_by: searchParams.get("sort_by") ?? "published_at",
+        sort_order: searchParams.get("sort_order") ?? "desc",
+        search: searchParams.get("search") ?? undefined,
+        min_score: searchParams.get("min_score") ? parseInt(searchParams.get("min_score")!) : undefined,
+        types: searchParams.getAll("type"),
+        countries: searchParams.getAll("country"),
+        industries: searchParams.getAll("industry"),
+        urgencies: searchParams.getAll("urgency"),
+        featured: searchParams.get("featured") === "true",
+      })
+    );
+  }
 
   const supabase = createAdminClient();
   const offset = (page - 1) * per_page;
