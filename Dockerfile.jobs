@@ -1,0 +1,8 @@
+FROM node:20-alpine
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci --omit=dev
+COPY scripts/ ./scripts/
+COPY src/lib/ ./src/lib/
+CMD ["node", "scripts/jobs.js"]
