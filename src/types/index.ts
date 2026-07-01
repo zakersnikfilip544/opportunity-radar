@@ -133,6 +133,7 @@ export interface Opportunity {
   is_live?: boolean;
   matched_keywords?: string[];
   additional_sources?: { name: string; url: string }[];
+  opportunity_reason?: string;
 
   // AI outputs
   why_it_matters?: string;

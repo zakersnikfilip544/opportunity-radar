@@ -1,17 +1,17 @@
 import type { OpportunityType } from "@/types";
-import { OPPORTUNITY_TYPE_CONFIG } from "@/types";
 import { extractCompanyName } from "./keywords";
 
 // ============================================================
-// Weighted relevance scoring for the Slovenian Business Signal Engine.
-// Deterministic only — no AI. Every concept below is matched as a whole
-// word/phrase (Slovenian + English variants, since one source publishes in
-// English) and contributes a fixed weight to the final 0-100 score.
+// Low-level signal detection & extraction library for the Slovenian
+// Business Signal Engine. Deterministic only — no AI. Every concept below
+// is matched as a whole word/phrase (Slovenian + English variants, since
+// one source publishes in English).
+//
+// This module only detects and extracts; the accept/reject decision and
+// scoring live one layer up, in the Business Intent Layer (./intent.ts).
 // ============================================================
 
-export const RELEVANCE_THRESHOLD = 60;
-
-interface SignalConcept {
+export interface SignalConcept {
   concept: string;
   terms: string[];
   weight: number;
@@ -40,33 +40,11 @@ export const POSITIVE_SIGNALS: SignalConcept[] = [
   { concept: "industrijski projekt", terms: ["industrijski projekt", "industrijska cona", "industrial project"], weight: 20, type: "factory_expansion" },
 ];
 
-export const NEGATIVE_SIGNALS: SignalConcept[] = [
-  { concept: "politika", terms: ["politika", "politični", "politics"], weight: 32, type: "other" },
-  { concept: "volitve", terms: ["volitve", "volilna kampanja", "elections"], weight: 32, type: "other" },
-  { concept: "nato", terms: ["nato"], weight: 40, type: "other" },
-  { concept: "rusija", terms: ["rusija", "russia"], weight: 35, type: "other" },
-  { concept: "ukrajina", terms: ["ukrajina", "ukraine"], weight: 35, type: "other" },
-  { concept: "vojna", terms: ["vojna", "war"], weight: 40, type: "other" },
-  { concept: "vojska", terms: ["vojska", "vojaški", "military"], weight: 35, type: "other" },
-  { concept: "šport", terms: ["šport", "nogomet", "košarka", "tekma", "prvenstvo", "sports"], weight: 30, type: "other" },
-  { concept: "nesreča", terms: ["nesreča", "prometna nesreča", "accident"], weight: 28, type: "other" },
-  { concept: "kriminal", terms: ["kriminal", "umor", "tatvina", "kaznivo dejanje", "crime"], weight: 32, type: "other" },
-  { concept: "smrt", terms: ["smrt", "umrl", "žrtev", "death"], weight: 32, type: "other" },
-  { concept: "vreme", terms: ["vreme", "vremenska napoved", "neurje", "toča", "weather"], weight: 24, type: "other" },
-  { concept: "kultura", terms: ["kultura", "razstava", "festival", "koncert", "culture"], weight: 18, type: "other" },
-  { concept: "zabava", terms: ["zabava", "šov", "entertainment"], weight: 18, type: "other" },
-  { concept: "mnenje", terms: ["mnenje", "kolumna", "komentar", "opinion"], weight: 22, type: "other" },
-  // Ceremonial / diplomatic coverage — not war or politics per se, but not a
-  // commercial signal either (e.g. national-day receptions, embassy events).
-  { concept: "slovesnost", terms: ["sprejem", "slovesnost", "obletnica", "veleposlaništvo", "diplomatski", "govor", "reception", "ceremony", "anniversary"], weight: 28, type: "other" },
-];
-
 // JS `\b` doesn't understand Slovenian diacritics, so this checks real word
-// boundaries by hand (shared logic, duplicated from keywords.ts to keep this
-// module self-contained).
+// boundaries by hand.
 const SL_WORD_CHAR = /[a-zA-ZčšžćđČŠŽĆĐ0-9]/;
 
-function includesWholeWord(haystack: string, needle: string): boolean {
+export function includesWholeWord(haystack: string, needle: string): boolean {
   let fromIndex = 0;
   for (;;) {
     const idx = haystack.indexOf(needle, fromIndex);
@@ -78,24 +56,16 @@ function includesWholeWord(haystack: string, needle: string): boolean {
   }
 }
 
-function matchConcepts(normalized: string, concepts: SignalConcept[]): SignalConcept[] {
+export function matchConcepts(normalized: string, concepts: SignalConcept[]): SignalConcept[] {
   return concepts.filter((c) => c.terms.some((term) => includesWholeWord(normalized, term.toLowerCase())));
-}
-
-export interface ScoredArticle {
-  score: number;
-  confidence: number;
-  type: OpportunityType;
-  matchedPositive: SignalConcept[];
-  matchedNegative: SignalConcept[];
 }
 
 // One source (Slovenia Times) aggregates some regional/international wire
 // content alongside real Slovenian business news. Since this whole engine
 // exists to find *Slovenian* opportunities, articles with no Slovenia
 // indicator at all (no "Slovenija/Slovenia" mention, no known municipality)
-// get a relevance penalty rather than being treated as domestic news.
-function hasSlovenianContext(text: string): boolean {
+// are treated as out of scope by the Business Intent Layer.
+export function hasSlovenianContext(text: string): boolean {
   const normalized = text.toLowerCase().normalize("NFC");
   if (
     includesWholeWord(normalized, "slovenija") ||
@@ -107,53 +77,6 @@ function hasSlovenianContext(text: string): boolean {
     return true;
   }
   return !!extractMunicipality(text);
-}
-
-const NON_SLOVENIAN_PENALTY = 25;
-
-/**
- * Weighted relevance score for an article: baseline + strongest matched
- * signal + a small bonus per additional distinct signal, minus the sum of
- * matched negative-signal weights, minus a penalty if nothing ties the story
- * to Slovenia, plus a small recency bonus. Returns null if there's no
- * positive signal at all, or the score falls below RELEVANCE_THRESHOLD (60)
- * — both cases mean "reject, not a real opportunity".
- */
-export function scoreArticle(text: string, publishedAt?: string): ScoredArticle | null {
-  const normalized = text.toLowerCase().normalize("NFC");
-
-  const matchedPositive = matchConcepts(normalized, POSITIVE_SIGNALS);
-  if (!matchedPositive.length) return null;
-
-  const matchedNegative = matchConcepts(normalized, NEGATIVE_SIGNALS);
-
-  const strongest = Math.max(...matchedPositive.map((c) => c.weight));
-  const additionalBonus = Math.min(3, matchedPositive.length - 1) * 6;
-  const positiveScore = 40 + strongest + additionalBonus;
-
-  const negativePenalty = matchedNegative.reduce((sum, c) => sum + c.weight, 0);
-  const geoPenalty = hasSlovenianContext(text) ? 0 : NON_SLOVENIAN_PENALTY;
-
-  const hoursAgo = publishedAt ? (Date.now() - new Date(publishedAt).getTime()) / 3_600_000 : Infinity;
-  const recencyBonus = hoursAgo <= 24 ? 5 : 0;
-
-  const score = Math.max(0, Math.min(100, positiveScore - negativePenalty - geoPenalty + recencyBonus));
-  if (score < RELEVANCE_THRESHOLD) return null;
-
-  const primaryType = matchedPositive.find((c) => c.weight === strongest)!.type;
-
-  const confidence = Math.min(
-    98,
-    50 + Math.min(4, matchedPositive.length) * 8 + (matchedNegative.length ? -10 : 0)
-  );
-
-  return { score, confidence, type: primaryType, matchedPositive, matchedNegative };
-}
-
-export function buildWhyItMatters(matchedPositive: SignalConcept[], type: OpportunityType): string {
-  const labels = matchedPositive.slice(0, 3).map((c) => c.concept);
-  const typeLabel = OPPORTUNITY_TYPE_CONFIG[type]?.label ?? type;
-  return `Članek omenja: ${labels.join(", ")} — kar kaže na realno poslovno priložnost v kategoriji "${typeLabel}".`;
 }
 
 // ============================================================
@@ -300,4 +223,14 @@ export function extractCompanyEntity(text: string, type: OpportunityType): Extra
   }
 
   return null;
+}
+
+/**
+ * Type-independent presence check — is there *any* identifiable named
+ * entity (company or institution) in this text at all? Used by the Business
+ * Intent Layer's Buying Probability score, which needs this before the
+ * opportunity `type` (and therefore the institution buying-gate) is known.
+ */
+export function hasIdentifiableEntity(text: string): boolean {
+  return !!extractCompanyName(text) || !!extractInstitution(text);
 }

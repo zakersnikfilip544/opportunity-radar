@@ -16,25 +16,30 @@ export interface BusinessProfile {
   recommendedAction: string;
 }
 
+// Plan B's vocabulary is deliberately narrow — only concepts that genuinely
+// signal branding/marketing/digital spend (companies growing, rebranding
+// potential, expansion, marketing, digitalisation, new products, new
+// locations, investments). No bare "event"/"startup"-type catch-alls that
+// used to surface generic ceremonial or unrelated news.
 const PLAN_B: BusinessProfile = {
   id: "plan-b",
   label: "Plan B",
   keywordRules: [
-    { keyword: "nov izdelek", type: "new_product" },
-    { keyword: "nova blagovna znamka", type: "new_product" },
+    { keyword: "rast podjetja", type: "expansion" },
+    { keyword: "prenova blagovne znamke", type: "new_product" },
     { keyword: "širitev", type: "expansion" },
-    { keyword: "nov trg", type: "expansion" },
-    { keyword: "spletna trgovina", type: "new_product" },
-    { keyword: "startup", type: "other" },
+    { keyword: "trženje", type: "other" },
+    { keyword: "digitalizacija", type: "digital_transformation" },
+    { keyword: "nov izdelek", type: "new_product" },
+    { keyword: "nova lokacija", type: "expansion" },
+    { keyword: "nova poslovalnica", type: "expansion" },
     { keyword: "investicija", type: "investment" },
-    { keyword: "dogodek", type: "other" },
-    { keyword: "sejem", type: "partnership" },
   ],
   salesAngleTerms: ["branding", "spletna stran", "landing page", "video", "foto", "oglaševanje", "email marketing"],
   salesAngleText:
     "Predlagane storitve Plan B: branding, spletna stran, landing page, video, foto, oglaševanje, email marketing.",
   recommendedAction:
-    "Stopite v stik in predstavite Plan B-jeve storitve (branding, spletna stran, oglaševanje) glede na ta poslovni signal.",
+    "Poiščite marketinškega vodjo ali lastnika podjetja in ga kontaktirajte v naslednjih 7 dneh s ponudbo Plan B (branding, spletna stran, oglaševanje), dokler je priložnost še aktualna.",
 };
 
 const KONEKT: BusinessProfile = {

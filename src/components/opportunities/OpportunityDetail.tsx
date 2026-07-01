@@ -219,6 +219,11 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
                 </div>
               </CardHeader>
               <CardContent>
+                {opp.opportunity_reason && (
+                  <p className="text-[11px] font-semibold text-radar-400 uppercase tracking-wider mb-1.5">
+                    Razlog: {opp.opportunity_reason}
+                  </p>
+                )}
                 <p className="text-sm text-zinc-400 leading-relaxed">{opp.why_it_matters}</p>
               </CardContent>
             </Card>

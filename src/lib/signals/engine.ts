@@ -1,8 +1,8 @@
 import { fetchFeed, type FetchedArticle } from "./fetch";
 import { SLOVENIAN_RSS_SOURCES } from "./sources";
-import { detectSignal, computeUrgency, RECOMMENDED_ACTION_SL } from "./keywords";
+import { detectSignal, computeUrgency } from "./keywords";
 import { MASTER_KEYWORD_RULES, getProfile, profileMatches, type ProfileId } from "./profiles";
-import { scoreArticle, buildWhyItMatters, extractMunicipality, extractIndustry, extractCompanyEntity } from "./scoring";
+import { evaluateArticle, extractMunicipality, extractIndustry, extractCompanyEntity, type IntentEvaluation } from "./intent";
 import { deduplicateOpportunities } from "./dedupe";
 import { deriveSalesAngle, deriveBestTimeToContact, slugify } from "@/lib/utils/helpers";
 import type { Opportunity } from "@/types";
@@ -22,31 +22,24 @@ function articleText(article: FetchedArticle): string {
   return `${article.title} ${article.content ?? ""}`;
 }
 
-function toOpportunity(article: FetchedArticle, sourceName: string): Opportunity | null {
-  if (!article.url || !article.title) return null;
-
-  const text = articleText(article);
-
-  // Primary gate: weighted relevance score. Below-threshold or zero-signal
-  // articles (generic news, politics, sports, ceremonies, ...) are rejected
-  // here, before any of the more expensive extraction work below runs.
-  const scored = scoreArticle(text, article.published_at);
-  if (!scored) return null;
-
+function toOpportunity(article: FetchedArticle, sourceName: string, evaluation: IntentEvaluation): Opportunity {
   // Separate pass over the profile-specific keyword vocabularies (Plan B /
-  // KONEKT / Besolar) — orthogonal to relevance scoring, only used so the
-  // existing profile selector keeps filtering correctly on top of this
-  // now-much-smaller, higher-quality pool.
+  // KONEKT / Besolar) — orthogonal to the Business Intent Layer, only used
+  // so the existing profile selector keeps filtering correctly on top of
+  // this now much smaller, much higher-quality pool. It can never lower the
+  // acceptance bar: it only ever runs on articles that already passed
+  // evaluateArticle().
+  const text = articleText(article);
   const profileSignal = detectSignal(text, MASTER_KEYWORD_RULES);
   const matchedKeywords = [...new Set([
-    ...scored.matchedPositive.map((c) => c.concept),
+    ...evaluation.matchedPositive.map((c) => c.concept),
     ...(profileSignal?.matchedKeywords ?? []),
   ])];
 
   const now = new Date().toISOString();
   const publishedAt = article.published_at ?? now;
-  const urgency = computeUrgency(publishedAt, scored.matchedPositive.length);
-  const company = extractCompanyEntity(text, scored.type);
+  const urgency = computeUrgency(publishedAt, evaluation.matchedPositive.length);
+  const company = extractCompanyEntity(text, evaluation.type);
   const municipality = extractMunicipality(text);
   const industry = extractIndustry(text);
 
@@ -54,18 +47,24 @@ function toOpportunity(article: FetchedArticle, sourceName: string): Opportunity
     id: `live-${slugify(article.url).slice(0, 80)}`,
     title: article.title,
     summary: (article.content || article.title).slice(0, 400),
-    type: scored.type,
+    type: evaluation.type,
     urgency,
-    opportunity_score: scored.score,
-    confidence_score: scored.confidence,
+    // opportunity_score = Business Intent Score, sales_potential = Commercial
+    // Potential, confidence_score = Buying Probability — the three Business
+    // Intent Layer scores, mapped onto the existing (previously-unused)
+    // fields the UI already renders as score rings, no layout changes needed.
+    opportunity_score: evaluation.businessIntentScore,
+    sales_potential: evaluation.commercialPotential,
+    confidence_score: evaluation.buyingProbability,
     country: "Slovenia",
     city: municipality ?? undefined,
     industry: industry ?? undefined,
     estimated_value_currency: "EUR",
     source_url: article.url,
     source_name: sourceName,
-    why_it_matters: buildWhyItMatters(scored.matchedPositive, scored.type),
-    suggested_action: RECOMMENDED_ACTION_SL[scored.type],
+    why_it_matters: evaluation.whyItMatters,
+    suggested_action: evaluation.recommendedAction,
+    opportunity_reason: evaluation.reasonLabel,
     tags: matchedKeywords,
     matched_keywords: matchedKeywords,
     is_live: true,
@@ -110,16 +109,25 @@ async function fetchFreshSignals(): Promise<CacheEntry> {
   const seenUrls = new Set<string>();
   const candidates: Opportunity[] = [];
   let fetchedCount = 0;
+  let rejectedNonBusiness = 0;
+  let rejectedLowValue = 0;
 
   for (const result of results) {
     if (result.status !== "fulfilled") continue;
     const { source, articles } = result.value;
     for (const article of articles) {
-      if (!article.url || seenUrls.has(article.url)) continue;
+      if (!article.url || !article.title || seenUrls.has(article.url)) continue;
       seenUrls.add(article.url);
       fetchedCount++;
-      const opp = toOpportunity(article, source.name);
-      if (opp) candidates.push(opp);
+
+      const outcome = evaluateArticle(articleText(article), article.published_at);
+      if (!outcome.accepted) {
+        if (outcome.rejectionReason === "non_business") rejectedNonBusiness++;
+        else rejectedLowValue++;
+        continue;
+      }
+
+      candidates.push(toOpportunity(article, source.name, outcome.accepted));
     }
   }
 
@@ -128,11 +136,17 @@ async function fetchFreshSignals(): Promise<CacheEntry> {
   const { deduped, duplicatesRemoved } = deduplicateOpportunities(candidates);
   const finalOpportunities = deduped.slice(0, MAX_RESULTS);
 
-  // Developer log — not user-facing, just for debugging feed/scoring quality.
+  const accepted = candidates.length;
+  const acceptanceRate = fetchedCount ? Math.round((accepted / fetchedCount) * 100) : 0;
+
+  // Developer Quality Report — not user-facing, just for debugging the
+  // Business Intent Layer's acceptance behavior.
   console.log(
-    `[SignalEngine] Fetched: ${fetchedCount} | Accepted: ${candidates.length} | ` +
-    `Rejected: ${fetchedCount - candidates.length} | Duplicates removed: ${duplicatesRemoved} | ` +
-    `Final opportunities: ${finalOpportunities.length}`
+    `[SignalEngine] Quality Report — Fetched: ${fetchedCount} | ` +
+    `Rejected as non-business: ${rejectedNonBusiness} | ` +
+    `Rejected as low commercial value: ${rejectedLowValue} | ` +
+    `Accepted: ${accepted} | Acceptance rate: ${acceptanceRate}% | ` +
+    `Duplicates removed: ${duplicatesRemoved} | Final opportunities: ${finalOpportunities.length}`
   );
 
   return {
