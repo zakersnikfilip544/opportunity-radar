@@ -11,6 +11,7 @@ import toast from "react-hot-toast";
 export default function OpportunityPage() {
   const { id } = useParams<{ id: string }>();
   const [opportunity, setOpportunity] = useState<Opportunity | null>(null);
+  const [related, setRelated] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
 
@@ -19,8 +20,23 @@ export default function OpportunityPage() {
       try {
         const res = await fetch(`/api/opportunities/${id}`);
         if (!res.ok) throw new Error("Not found");
-        const data = await res.json();
+        const data: Opportunity = await res.json();
         setOpportunity(data);
+
+        if (data.company?.slug) {
+          try {
+            const companyRes = await fetch(`/api/companies/${data.company.slug}`);
+            if (companyRes.ok) {
+              const companyData = await companyRes.json();
+              const others = (companyData.opportunities || []).filter(
+                (o: Opportunity) => o.id !== data.id
+              );
+              setRelated(others.slice(0, 4));
+            }
+          } catch {
+            // related opportunities are a nice-to-have, ignore failures
+          }
+        }
       } catch {
         toast.error("Failed to load opportunity");
       } finally {
@@ -53,6 +69,7 @@ export default function OpportunityPage() {
             opportunity={opportunity}
             saved={saved}
             onSave={handleSave}
+            relatedOpportunities={related}
           />
         ) : (
           <p className="text-center text-zinc-500 py-20">Opportunity not found.</p>

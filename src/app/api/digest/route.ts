@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { generateDigestSummary } from "@/lib/openai/analyzer";
+import { getMockDigest } from "@/lib/mock";
 import { format } from "date-fns";
 
 export async function GET(req: NextRequest) {
-  if (!isSupabaseConfigured()) return NextResponse.json({ error: "Digest not found" }, { status: 404 });
+  if (!isSupabaseConfigured()) return NextResponse.json(getMockDigest());
   const supabase = createAdminClient();
   const { searchParams } = req.nextUrl;
   const dateParam = searchParams.get("date") || format(new Date(), "yyyy-MM-dd");
@@ -33,6 +34,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // Demo mode: no live ingestion pipeline, just return the mock digest as if regenerated
+  if (!isSupabaseConfigured()) return NextResponse.json(getMockDigest());
+
   // Verify cron secret
   const authHeader = req.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {

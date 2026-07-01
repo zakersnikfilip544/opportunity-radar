@@ -8,6 +8,7 @@ import {
   UrgencyBreakdownChart, IndustryChart,
 } from "@/components/dashboard/Charts";
 import { OpportunityCard } from "@/components/opportunities/OpportunityCard";
+import { HeroOpportunity } from "@/components/dashboard/HeroOpportunity";
 import { CardSkeleton } from "@/components/ui/skeleton";
 import { SearchBar } from "@/components/search/SearchBar";
 import { Button } from "@/components/ui/button";
@@ -76,6 +77,10 @@ export default function DashboardPage() {
             </button>
           </div>
         )}
+
+        {/* Best Opportunity Today */}
+        {!loading && topOpps[0] && <HeroOpportunity opportunity={topOpps[0]} />}
+        {loading && <CardSkeleton />}
 
         {/* Search */}
         <div className="relative rounded-xl border border-zinc-800 bg-gradient-to-r from-zinc-900 via-zinc-900/80 to-zinc-950 p-4 sm:p-5 overflow-hidden">

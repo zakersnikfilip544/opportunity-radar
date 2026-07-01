@@ -19,23 +19,31 @@ import {
   Building2,
   Bookmark,
   BookmarkCheck,
+  Compass,
+  CalendarClock,
+  Newspaper,
+  Link2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ScoreRing } from "@/components/ui/score-ring";
+import { OpportunityCard } from "@/components/opportunities/OpportunityCard";
 import { OPPORTUNITY_TYPE_CONFIG, URGENCY_CONFIG } from "@/types";
 import type { Opportunity } from "@/types";
 import {
   formatRelativeDate,
   parseValueRange,
   cn,
+  deriveSalesAngle,
+  deriveBestTimeToContact,
 } from "@/lib/utils/helpers";
 
 interface OpportunityDetailProps {
   opportunity: Opportunity;
   saved?: boolean;
   onSave?: () => void;
+  relatedOpportunities?: Opportunity[];
 }
 
 function CopyButton({ text }: { text: string }) {
@@ -55,10 +63,12 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-export function OpportunityDetail({ opportunity: opp, saved, onSave }: OpportunityDetailProps) {
+export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOpportunities }: OpportunityDetailProps) {
   const [activeTab, setActiveTab] = useState<"overview" | "outreach" | "ai">("overview");
   const typeConfig = OPPORTUNITY_TYPE_CONFIG[opp.type];
   const urgencyConfig = URGENCY_CONFIG[opp.urgency];
+  const salesAngle = opp.sales_angle || deriveSalesAngle(opp);
+  const bestTimeToContact = opp.best_time_to_contact || deriveBestTimeToContact(opp);
 
   const scores = [
     { label: "Opportunity", value: opp.opportunity_score || 0 },
@@ -222,6 +232,30 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave }: Opportuni
             </Card>
           )}
 
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Compass className="h-4 w-4 text-pink-400" />
+                <h3 className="text-sm font-semibold text-zinc-200">Sales Angle</h3>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-zinc-400 leading-relaxed">{salesAngle}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <CalendarClock className="h-4 w-4 text-cyan-400" />
+                <h3 className="text-sm font-semibold text-zinc-200">Best Time to Contact</h3>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-zinc-400 leading-relaxed">{bestTimeToContact}</p>
+            </CardContent>
+          </Card>
+
           {(opp.potential_buyers?.length || opp.target_roles?.length) && (
             <Card>
               <CardHeader>
@@ -341,6 +375,52 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave }: Opportuni
           {opp.tags.map((tag) => (
             <Badge key={tag} variant="outline" size="sm">#{tag}</Badge>
           ))}
+        </div>
+      )}
+
+      {/* Source */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Newspaper className="h-4 w-4 text-zinc-500" />
+            <h3 className="text-sm font-semibold text-zinc-200">Source</h3>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <p className="text-sm text-zinc-400 leading-relaxed">{opp.title}</p>
+          {opp.source_url ? (
+            <a
+              href={opp.source_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs text-radar-400 hover:text-radar-300 transition-colors break-all"
+            >
+              <Link2 className="h-3 w-3 shrink-0" />
+              {opp.source_url}
+            </a>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 text-xs text-zinc-600 italic">
+              <Link2 className="h-3 w-3 shrink-0" />
+              No source URL available
+            </span>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Related opportunities from same company */}
+      {relatedOpportunities && relatedOpportunities.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-4">
+            <Building2 className="h-4 w-4 text-zinc-500" />
+            <h3 className="text-sm font-semibold text-zinc-200">
+              More from {opp.company?.name ?? "this company"}
+            </h3>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            {relatedOpportunities.map((related) => (
+              <OpportunityCard key={related.id} opportunity={related} compact />
+            ))}
+          </div>
         </div>
       )}
     </div>

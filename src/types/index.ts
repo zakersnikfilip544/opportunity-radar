@@ -133,6 +133,8 @@ export interface Opportunity {
   potential_buyers?: string[];
   potential_sellers?: string[];
   suggested_action?: string;
+  sales_angle?: string;
+  best_time_to_contact?: string;
   cold_email?: string;
   linkedin_message?: string;
   target_roles?: string[];
@@ -182,6 +184,8 @@ export interface DigestStats {
   estimated_total_value?: number;
 }
 
+export type SavedStage = "saved" | "contacted" | "meeting" | "won" | "lost";
+
 export interface SavedOpportunity {
   id: string;
   user_id: string;
@@ -189,6 +193,7 @@ export interface SavedOpportunity {
   opportunity?: Opportunity;
   notes?: string;
   tags: string[];
+  stage?: SavedStage;
   created_at: string;
 }
 
@@ -319,3 +324,13 @@ export const URGENCY_CONFIG: Record<UrgencyLevel, { label: string; color: string
   high: { label: "High", color: "text-orange-400" },
   critical: { label: "Critical", color: "text-red-400" },
 };
+
+export const SAVED_STAGE_CONFIG: Record<SavedStage, { label: string; color: string }> = {
+  saved: { label: "Saved", color: "bg-zinc-500/15 text-zinc-300 border-zinc-500/30" },
+  contacted: { label: "Contacted", color: "bg-blue-500/15 text-blue-300 border-blue-500/30" },
+  meeting: { label: "Meeting", color: "bg-violet-500/15 text-violet-300 border-violet-500/30" },
+  won: { label: "Won", color: "bg-green-500/15 text-green-300 border-green-500/30" },
+  lost: { label: "Lost", color: "bg-red-500/15 text-red-300 border-red-500/30" },
+};
+
+export const SAVED_STAGE_ORDER: SavedStage[] = ["saved", "contacted", "meeting", "won", "lost"];

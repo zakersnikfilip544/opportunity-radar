@@ -10,7 +10,7 @@ import {
   DollarSign, Target, RefreshCw, ChevronRight,
 } from "lucide-react";
 import type { DailyDigest, Opportunity } from "@/types";
-import { formatDate } from "@/lib/utils/helpers";
+import { formatDate, parseValueRange } from "@/lib/utils/helpers";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 
@@ -53,8 +53,19 @@ export default function DigestPage() {
 
   const opps = digest?.opportunities || [];
   const critical = opps.filter((o) => o.urgency === "critical" || o.urgency === "high");
-  const topScore = [...opps].sort((a, b) => (b.opportunity_score ?? 0) - (a.opportunity_score ?? 0)).slice(0, 4);
-  const highValue = opps.filter((o) => o.estimated_value_min || o.estimated_value_max).slice(0, 4);
+  const topTen = [...opps].sort((a, b) => (b.opportunity_score ?? 0) - (a.opportunity_score ?? 0)).slice(0, 10);
+  const highValue = [...opps]
+    .filter((o) => o.estimated_value_min || o.estimated_value_max)
+    .sort((a, b) => (b.estimated_value_max ?? b.estimated_value_min ?? 0) - (a.estimated_value_max ?? a.estimated_value_min ?? 0));
+  const biggestDeal = highValue[0];
+
+  const countryCounts: Record<string, number> = {};
+  opps.forEach((o) => { if (o.country) countryCounts[o.country] = (countryCounts[o.country] ?? 0) + 1; });
+  const topCountries = Object.entries(countryCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+  const industryCounts: Record<string, number> = {};
+  opps.forEach((o) => { if (o.industry) industryCounts[o.industry] = (industryCounts[o.industry] ?? 0) + 1; });
+  const topIndustries = Object.entries(industryCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
 
   return (
     <div className="min-h-screen bg-zinc-950">
@@ -110,7 +121,7 @@ export default function DigestPage() {
 
                 {/* KPIs */}
                 {digest.stats && (
-                  <div className="mt-6 pt-5 border-t border-zinc-800/60 grid grid-cols-3 gap-3 sm:gap-6">
+                  <div className="mt-6 pt-5 border-t border-zinc-800/60 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6">
                     <div>
                       <div className="text-xl sm:text-3xl font-bold text-radar-400 mb-1">
                         {digest.stats.total_opportunities}
@@ -128,6 +139,14 @@ export default function DigestPage() {
                         {digest.stats.high_urgency_count ?? 0}
                       </div>
                       <div className="text-[10px] sm:text-xs text-zinc-600 uppercase tracking-wider">High Urgency</div>
+                    </div>
+                    <div>
+                      <div className="text-xl sm:text-3xl font-bold text-green-400 mb-1">
+                        {biggestDeal
+                          ? parseValueRange(biggestDeal.estimated_value_min, biggestDeal.estimated_value_max, biggestDeal.estimated_value_currency)
+                          : "—"}
+                      </div>
+                      <div className="text-[10px] sm:text-xs text-zinc-600 uppercase tracking-wider">Biggest Deal</div>
                     </div>
                   </div>
                 )}
@@ -151,17 +170,17 @@ export default function DigestPage() {
               </section>
             )}
 
-            {/* Section 2: Best AI scores */}
+            {/* Section 2: Top 10 */}
             <section>
               <SectionHeader
                 icon={<TrendingUp className="h-4 w-4 text-radar-400" />}
-                title="Best Sales Angles"
+                title="Top 10 Opportunities"
                 subtitle="Highest-scored opportunities by AI relevance and potential"
                 accent="text-radar-400"
               />
               <div className="grid md:grid-cols-2 gap-4">
-                {topScore.map((opp) => (
-                  <OpportunityCard key={opp.id} opportunity={opp} />
+                {topTen.map((opp) => (
+                  <OpportunityCard key={opp.id} opportunity={opp} compact />
                 ))}
               </div>
             </section>
@@ -172,11 +191,11 @@ export default function DigestPage() {
                 <SectionHeader
                   icon={<DollarSign className="h-4 w-4 text-green-400" />}
                   title="Money in Motion"
-                  subtitle="Opportunities with known estimated contract or deal value"
+                  subtitle="Opportunities with known estimated contract or deal value, biggest first"
                   accent="text-green-400"
                 />
                 <div className="grid md:grid-cols-2 gap-4">
-                  {highValue.map((opp) => (
+                  {highValue.slice(0, 4).map((opp) => (
                     <OpportunityCard key={opp.id} opportunity={opp} />
                   ))}
                 </div>
@@ -198,9 +217,9 @@ export default function DigestPage() {
               </div>
             </section>
 
-            {/* Type/country breakdown */}
+            {/* Type/country/industry breakdown */}
             {digest.stats && (
-              <div className="grid md:grid-cols-2 gap-4 pt-2">
+              <div className="grid md:grid-cols-3 gap-4 pt-2">
                 <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
                   <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">By Type</p>
                   <div className="flex flex-wrap gap-1.5">
@@ -212,11 +231,21 @@ export default function DigestPage() {
                   </div>
                 </div>
                 <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
-                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">By Country</p>
+                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Top Countries</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {Object.entries(digest.stats.by_country ?? {}).slice(0, 8).map(([country, count]) => (
+                    {topCountries.map(([country, count]) => (
                       <span key={country} className="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-700">
                         {country || "Unknown"} · {count}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
+                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Top Industries</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {topIndustries.map(([industry, count]) => (
+                      <span key={industry} className="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-700">
+                        {industry} · {count}
                       </span>
                     ))}
                   </div>

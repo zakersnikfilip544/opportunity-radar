@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bookmark, BookmarkCheck, ExternalLink, Clock, TrendingUp } from "lucide-react";
+import { Bookmark, BookmarkCheck, ExternalLink, Clock, TrendingUp, ArrowUpRight } from "lucide-react";
 import { cn, formatRelativeDate, parseValueRange } from "@/lib/utils/helpers";
 import { OPPORTUNITY_TYPE_CONFIG } from "@/types";
 import type { Opportunity } from "@/types";
@@ -182,6 +182,18 @@ export function OpportunityCard({ opportunity: opp, saved, onSave, compact }: Op
           </a>
         )}
       </div>
+
+      {/* CTA */}
+      <Link
+        href={`/opportunities/${opp.id}`}
+        className={cn(
+          "flex items-center justify-center gap-1.5 border-t border-zinc-800/60 px-4 py-2.5",
+          "text-xs font-semibold text-radar-400 hover:text-radar-300 hover:bg-radar-500/5 transition-colors"
+        )}
+      >
+        View Strategy
+        <ArrowUpRight className="h-3 w-3" />
+      </Link>
     </div>
   );
 }

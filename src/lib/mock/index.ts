@@ -1,7 +1,8 @@
-import type { Opportunity, Company, DashboardStats, OpportunityType } from "@/types";
+import type { Opportunity, Company, DashboardStats, OpportunityType, SavedOpportunity, SavedStage } from "@/types";
 import { MOCK_OPPORTUNITIES } from "./opportunities";
 import { MOCK_COMPANIES } from "./companies";
 import { MOCK_DIGEST } from "./digest";
+import { buildMockSaved, DEMO_USER_ID } from "./saved";
 
 // Attach company objects to opportunities
 const companiesById = Object.fromEntries(MOCK_COMPANIES.map((c) => [c.id, c]));
@@ -187,6 +188,50 @@ export function getMockDigest() {
     opportunity_ids: opps.map((o) => o.id),
     opportunities: opps,
   };
+}
+
+// ── Saved pipeline ─────────────────────────────────────────────────────────
+
+let mockSavedStore: SavedOpportunity[] | null = null;
+
+function savedStore(): SavedOpportunity[] {
+  if (!mockSavedStore) mockSavedStore = buildMockSaved();
+  return mockSavedStore;
+}
+
+export function getMockSaved(): (SavedOpportunity & { opportunity?: Opportunity })[] {
+  return [...savedStore()]
+    .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
+    .map((s) => ({ ...s, opportunity: getMockOpportunity(s.opportunity_id) ?? undefined }));
+}
+
+export function addMockSaved(opportunityId: string): SavedOpportunity {
+  const store = savedStore();
+  const existing = store.find((s) => s.opportunity_id === opportunityId);
+  if (existing) return existing;
+  const entry: SavedOpportunity = {
+    id: `sv-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    user_id: DEMO_USER_ID,
+    opportunity_id: opportunityId,
+    stage: "saved",
+    tags: [],
+    created_at: new Date().toISOString(),
+  };
+  store.unshift(entry);
+  return entry;
+}
+
+export function updateMockSavedStage(opportunityId: string, stage: SavedStage): SavedOpportunity | null {
+  const entry = savedStore().find((s) => s.opportunity_id === opportunityId);
+  if (!entry) return null;
+  entry.stage = stage;
+  return entry;
+}
+
+export function removeMockSaved(opportunityId: string): void {
+  const store = savedStore();
+  const idx = store.findIndex((s) => s.opportunity_id === opportunityId);
+  if (idx >= 0) store.splice(idx, 1);
 }
 
 // ── Search ─────────────────────────────────────────────────────────────────
