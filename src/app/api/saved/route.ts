@@ -6,7 +6,7 @@ import type { SavedStage } from "@/types";
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const userId = searchParams.get("user_id");
-  if (!userId) return NextResponse.json({ error: "user_id required" }, { status: 400 });
+  if (!userId) return NextResponse.json({ error: "Zahtevan je user_id" }, { status: 400 });
 
   if (!isSupabaseConfigured()) return NextResponse.json(getMockSaved());
 
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
   const { user_id, opportunity_id, notes, tags } = await req.json();
 
   if (!user_id || !opportunity_id) {
-    return NextResponse.json({ error: "user_id and opportunity_id required" }, { status: 400 });
+    return NextResponse.json({ error: "Zahtevana sta user_id in opportunity_id" }, { status: 400 });
   }
 
   if (!isSupabaseConfigured()) return NextResponse.json(addMockSaved(opportunity_id));
@@ -46,12 +46,12 @@ export async function PATCH(req: NextRequest) {
   const { opportunity_id, stage } = await req.json();
 
   if (!opportunity_id || !stage) {
-    return NextResponse.json({ error: "opportunity_id and stage required" }, { status: 400 });
+    return NextResponse.json({ error: "Zahtevana sta opportunity_id in stage" }, { status: 400 });
   }
 
   if (!isSupabaseConfigured()) {
     const updated = updateMockSavedStage(opportunity_id, stage as SavedStage);
-    if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!updated) return NextResponse.json({ error: "Ni najdeno" }, { status: 404 });
     return NextResponse.json(updated);
   }
 
@@ -73,7 +73,7 @@ export async function DELETE(req: NextRequest) {
   const opportunityId = searchParams.get("opportunity_id");
 
   if (!userId || !opportunityId) {
-    return NextResponse.json({ error: "user_id and opportunity_id required" }, { status: 400 });
+    return NextResponse.json({ error: "Zahtevana sta user_id in opportunity_id" }, { status: 400 });
   }
 
   if (!isSupabaseConfigured()) {

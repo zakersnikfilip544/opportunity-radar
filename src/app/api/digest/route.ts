@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     .single();
 
   if (error || !digest) {
-    return NextResponse.json({ error: "Digest not found" }, { status: 404 });
+    return NextResponse.json({ error: "Pregled ni najden" }, { status: 404 });
   }
 
   // Fetch opportunities
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
   // Verify cron secret
   const authHeader = req.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Nepooblaščen dostop" }, { status: 401 });
   }
 
   const supabase = createAdminClient();
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (existing) {
-    return NextResponse.json({ message: "Digest already exists", id: existing.id });
+    return NextResponse.json({ message: "Pregled že obstaja", id: existing.id });
   }
 
   // Get top 20 opportunities from today
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       .limit(20);
 
     if (!recent?.length) {
-      return NextResponse.json({ error: "No opportunities found" }, { status: 404 });
+      return NextResponse.json({ error: "Ni najdenih priložnosti" }, { status: 404 });
     }
     opportunities?.push(...(recent || []));
   }

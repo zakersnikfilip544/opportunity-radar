@@ -43,12 +43,12 @@ export function CompanyCard({ company, opportunityCount }: CompanyCardProps) {
           {company.employee_count_range && (
             <span className="flex items-center gap-1">
               <Users className="h-3 w-3" />
-              {company.employee_count_range} employees
+              {company.employee_count_range} zaposlenih
             </span>
           )}
           {opportunityCount !== undefined && (
             <span className="ml-auto text-radar-400 font-medium">
-              {opportunityCount} opportunities
+              {opportunityCount} priložnosti
             </span>
           )}
         </div>

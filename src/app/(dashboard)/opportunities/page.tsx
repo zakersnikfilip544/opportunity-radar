@@ -9,25 +9,26 @@ import { SearchBar } from "@/components/search/SearchBar";
 import { CardSkeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, LayoutGrid, List, X, Star, Zap, AlertTriangle } from "lucide-react";
-import type { Opportunity, OpportunityFilters, PaginatedResponse } from "@/types";
+import { OPPORTUNITY_TYPE_CONFIG, URGENCY_CONFIG } from "@/types";
+import type { Opportunity, OpportunityFilters, PaginatedResponse, OpportunityType, UrgencyLevel } from "@/types";
 import { cn } from "@/lib/utils/helpers";
 import toast from "react-hot-toast";
 
 const QUICK_FILTERS: { label: string; icon: React.ReactNode; filters: Partial<OpportunityFilters> }[] = [
-  { label: "Top Scored", icon: <Star className="h-3 w-3" />, filters: { sort_by: "opportunity_score", sort_order: "desc", min_score: 70 } },
-  { label: "Critical", icon: <AlertTriangle className="h-3 w-3" />, filters: { urgency: ["critical"] } },
-  { label: "High Urgency", icon: <Zap className="h-3 w-3" />, filters: { urgency: ["critical", "high"] } },
-  { label: "Funding", icon: <span className="text-[11px]">💰</span>, filters: { type: ["funding"] } },
-  { label: "Expansion", icon: <span className="text-[11px]">🌍</span>, filters: { type: ["expansion"] } },
-  { label: "Hiring", icon: <span className="text-[11px]">👥</span>, filters: { type: ["hiring"] } },
-  { label: "Tenders", icon: <span className="text-[11px]">📋</span>, filters: { type: ["government_tender"] } },
+  { label: "Najbolje ocenjeno", icon: <Star className="h-3 w-3" />, filters: { sort_by: "opportunity_score", sort_order: "desc", min_score: 70 } },
+  { label: "Kritično", icon: <AlertTriangle className="h-3 w-3" />, filters: { urgency: ["critical"] } },
+  { label: "Visoka nujnost", icon: <Zap className="h-3 w-3" />, filters: { urgency: ["critical", "high"] } },
+  { label: "Financiranje", icon: <span className="text-[11px]">💰</span>, filters: { type: ["funding"] } },
+  { label: "Širitev", icon: <span className="text-[11px]">🌍</span>, filters: { type: ["expansion"] } },
+  { label: "Zaposlovanje", icon: <span className="text-[11px]">👥</span>, filters: { type: ["hiring"] } },
+  { label: "Razpisi", icon: <span className="text-[11px]">📋</span>, filters: { type: ["government_tender"] } },
 ];
 
 const SORT_OPTIONS = [
-  { value: "published_at", label: "Latest" },
-  { value: "opportunity_score", label: "Score" },
-  { value: "urgency_score", label: "Urgency" },
-  { value: "sales_potential", label: "Sales Potential" },
+  { value: "published_at", label: "Najnovejše" },
+  { value: "opportunity_score", label: "Ocena" },
+  { value: "urgency_score", label: "Nujnost" },
+  { value: "sales_potential", label: "Prodajni potencial" },
 ];
 
 const DEFAULT_FILTERS: OpportunityFilters = { page: 1, per_page: 18, sort_by: "published_at", sort_order: "desc" };
@@ -71,7 +72,7 @@ function OpportunitiesContent() {
       const res = await fetch(`/api/opportunities?${params}`);
       setData(await res.json());
     } catch {
-      toast.error("Failed to load opportunities");
+      toast.error("Nalaganje priložnosti ni uspelo");
     } finally {
       setLoading(false);
     }
@@ -85,7 +86,7 @@ function OpportunitiesContent() {
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
-    toast.success(saved.has(id) ? "Removed from saved" : "Saved!");
+    toast.success(saved.has(id) ? "Odstranjeno iz shranjenih" : "Shranjeno!");
   }
 
   function applyQuickFilter(idx: number) {
@@ -106,16 +107,16 @@ function OpportunitiesContent() {
   // Active filter chips
   const chips: { label: string; key: keyof OpportunityFilters }[] = [];
   if (filters.search) chips.push({ label: `"${filters.search}"`, key: "search" });
-  if (filters.urgency?.length) chips.push({ label: `Urgency: ${filters.urgency.join(", ")}`, key: "urgency" });
-  if (filters.type?.length) chips.push({ label: `Type: ${filters.type.join(", ")}`, key: "type" });
-  if (filters.min_score) chips.push({ label: `Score ≥ ${filters.min_score}`, key: "min_score" });
-  if (filters.country?.length) chips.push({ label: `Country: ${filters.country.join(", ")}`, key: "country" });
+  if (filters.urgency?.length) chips.push({ label: `Nujnost: ${filters.urgency.map((u) => URGENCY_CONFIG[u as UrgencyLevel].label).join(", ")}`, key: "urgency" });
+  if (filters.type?.length) chips.push({ label: `Vrsta: ${filters.type.map((t) => OPPORTUNITY_TYPE_CONFIG[t as OpportunityType].label).join(", ")}`, key: "type" });
+  if (filters.min_score) chips.push({ label: `Ocena ≥ ${filters.min_score}`, key: "min_score" });
+  if (filters.country?.length) chips.push({ label: `Država: ${filters.country.join(", ")}`, key: "country" });
 
   return (
     <div className="min-h-screen bg-zinc-950">
       <Header
-        title="Opportunities"
-        subtitle={loading ? "Loading..." : `${data?.total ?? 0} opportunities`}
+        title="Priložnosti"
+        subtitle={loading ? "Nalaganje ..." : `${data?.total ?? 0} priložnosti`}
       />
 
       <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5 max-w-7xl">
@@ -125,7 +126,7 @@ function OpportunitiesContent() {
             <SearchBar
               inline
               onSearch={(q) => setFilters((f) => ({ ...f, search: q, page: 1 }))}
-              placeholder="Search opportunities..."
+              placeholder="Išči priložnosti ..."
             />
           </div>
           <select
@@ -156,7 +157,7 @@ function OpportunitiesContent() {
 
         {/* Quick filter pills */}
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[11px] text-zinc-600 uppercase tracking-wider mr-1">Quick:</span>
+          <span className="text-[11px] text-zinc-600 uppercase tracking-wider mr-1">Hitro:</span>
           {QUICK_FILTERS.map((qf, i) => (
             <button
               key={i}
@@ -177,7 +178,7 @@ function OpportunitiesContent() {
         {/* Active filter chips */}
         {chips.length > 0 && (
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] text-zinc-600">Filters:</span>
+            <span className="text-[11px] text-zinc-600">Filtri:</span>
             {chips.map((chip) => (
               <button
                 key={chip.key}
@@ -192,7 +193,7 @@ function OpportunitiesContent() {
               onClick={() => { setActiveQuick(null); setFilters(DEFAULT_FILTERS); }}
               className="text-[11px] text-zinc-600 hover:text-zinc-400 transition-colors"
             >
-              Clear all
+              Počisti vse
             </button>
           </div>
         )}
@@ -200,8 +201,8 @@ function OpportunitiesContent() {
         {/* Result count */}
         {!loading && data && (
           <p className="text-xs text-zinc-600">
-            Showing {data.data.length} of {data.total} results
-            {data.total_pages > 1 && ` · page ${data.page} of ${data.total_pages}`}
+            Prikazanih {data.data.length} od {data.total} rezultatov
+            {data.total_pages > 1 && ` · stran ${data.page} od ${data.total_pages}`}
           </p>
         )}
 
@@ -226,9 +227,9 @@ function OpportunitiesContent() {
         {!loading && data?.data.length === 0 && (
           <div className="text-center py-20 border border-dashed border-zinc-800 rounded-xl">
             <Zap className="h-7 w-7 text-zinc-700 mx-auto mb-3" />
-            <p className="text-sm text-zinc-500 mb-3">No opportunities match your filters.</p>
+            <p className="text-sm text-zinc-500 mb-3">Nobena priložnost ne ustreza vašim filtrom.</p>
             <Button variant="ghost" size="sm" onClick={() => { setActiveQuick(null); setFilters(DEFAULT_FILTERS); }}>
-              Clear filters
+              Počisti filtre
             </Button>
           </div>
         )}
@@ -237,7 +238,7 @@ function OpportunitiesContent() {
         {data && data.total_pages > 1 && (
           <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
             <span className="text-xs text-zinc-500">
-              Page {data.page} of {data.total_pages} · {data.total} total
+              Stran {data.page} od {data.total_pages} · {data.total} skupaj
             </span>
             <div className="flex gap-2">
               <Button

@@ -10,12 +10,12 @@ import { cn } from "@/lib/utils/helpers";
 import { useSidebar } from "./SidebarContext";
 
 const navItems = [
-  { href: "/dashboard",      label: "Dashboard",     icon: LayoutDashboard, shortcut: "⌘1", stat: "Overview" },
-  { href: "/opportunities",  label: "Opportunities", icon: Zap,             shortcut: "⌘2", stat: "40 total" },
-  { href: "/companies",      label: "Companies",     icon: Building2,       shortcut: "⌘3", stat: "15 tracked" },
-  { href: "/search",         label: "Search",        icon: Search,          shortcut: "⌘4", stat: "AI-powered" },
-  { href: "/digest",         label: "Daily Digest",  icon: Calendar,        shortcut: "⌘5", stat: "Updated today" },
-  { href: "/saved",          label: "Saved",         icon: BookmarkCheck,   shortcut: "⌘6", stat: "0 saved" },
+  { href: "/dashboard",      label: "Nadzorna plošča", icon: LayoutDashboard, shortcut: "⌘1", stat: "Pregled" },
+  { href: "/opportunities",  label: "Priložnosti",     icon: Zap,             shortcut: "⌘2", stat: "40 skupaj" },
+  { href: "/companies",      label: "Podjetja",        icon: Building2,       shortcut: "⌘3", stat: "15 spremljanih" },
+  { href: "/search",         label: "Iskanje",         icon: Search,          shortcut: "⌘4", stat: "Z umetno inteligenco" },
+  { href: "/digest",         label: "Dnevni pregled",  icon: Calendar,        shortcut: "⌘5", stat: "Posodobljeno danes" },
+  { href: "/saved",          label: "Shranjeno",       icon: BookmarkCheck,   shortcut: "⌘6", stat: "0 shranjenih" },
 ];
 
 export function Sidebar() {
@@ -54,7 +54,7 @@ export function Sidebar() {
         <button
           onClick={close}
           className="lg:hidden flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/60 transition-colors"
-          aria-label="Close menu"
+          aria-label="Zapri meni"
         >
           <X className="h-4 w-4" />
         </button>
@@ -64,10 +64,10 @@ export function Sidebar() {
       <div className="mx-3 mt-3 mb-1 rounded-lg bg-radar-500/5 border border-radar-500/15 px-3 py-2">
         <div className="flex items-center gap-2">
           <Activity className="h-3 w-3 text-radar-400 shrink-0" />
-          <span className="text-[11px] text-zinc-400 font-medium">Scanning 12 sources</span>
+          <span className="text-[11px] text-zinc-400 font-medium">Pregledovanje 12 virov</span>
           <span className="ml-auto flex h-1.5 w-1.5 rounded-full bg-radar-400 animate-pulse shrink-0" />
         </div>
-        <p className="text-[10px] text-zinc-600 mt-1 pl-5">Last scan: 2 hours ago</p>
+        <p className="text-[10px] text-zinc-600 mt-1 pl-5">Zadnji pregled: pred 2 urama</p>
       </div>
 
       {/* Nav */}
@@ -106,7 +106,7 @@ export function Sidebar() {
           className="flex items-center gap-3 px-3 py-3 lg:py-2.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/60 transition-all"
         >
           <Settings className="h-4 w-4 text-zinc-600" />
-          Settings
+          Nastavitve
         </Link>
 
         {/* User */}
@@ -115,10 +115,10 @@ export function Sidebar() {
             U
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-zinc-200 truncate">Demo User</p>
-            <p className="text-[10px] text-zinc-600 truncate">demo mode active</p>
+            <p className="text-xs font-semibold text-zinc-200 truncate">Demo uporabnik</p>
+            <p className="text-[10px] text-zinc-600 truncate">način predstavitve je aktiven</p>
           </div>
-          <span className="h-2 w-2 rounded-full bg-radar-500 shrink-0" title="Online" />
+          <span className="h-2 w-2 rounded-full bg-radar-500 shrink-0" title="Povezano" />
         </div>
       </div>
       </aside>

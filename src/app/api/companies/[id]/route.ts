@@ -10,7 +10,7 @@ export async function GET(
 
   if (!isSupabaseConfigured()) {
     const result = getMockCompany(id);
-    if (!result) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!result) return NextResponse.json({ error: "Ni najdeno" }, { status: 404 });
     return NextResponse.json(result);
   }
 
@@ -23,7 +23,7 @@ export async function GET(
     : await query.eq("slug", id).single();
 
   if (error || !company) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: "Ni najdeno" }, { status: 404 });
   }
 
   const { data: opportunities } = await supabase

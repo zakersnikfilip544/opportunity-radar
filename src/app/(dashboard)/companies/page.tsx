@@ -30,7 +30,7 @@ export default function CompaniesPage() {
       const json = await res.json();
       setData(json);
     } catch {
-      toast.error("Failed to load companies");
+      toast.error("Nalaganje podjetij ni uspelo");
     } finally {
       setLoading(false);
     }
@@ -39,15 +39,15 @@ export default function CompaniesPage() {
   return (
     <div>
       <Header
-        title="Companies"
-        subtitle={`${data?.total || 0} companies tracked`}
+        title="Podjetja"
+        subtitle={`${data?.total || 0} spremljanih podjetij`}
       />
 
       <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6 max-w-7xl">
         <div className="max-w-md">
           <Input
             icon={<Search className="h-4 w-4" />}
-            placeholder="Search companies..."
+            placeholder="Išči podjetja ..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           />
@@ -63,14 +63,14 @@ export default function CompaniesPage() {
 
         {!loading && data?.data.length === 0 && (
           <div className="text-center py-20 border border-dashed border-zinc-800 rounded-xl">
-            <p className="text-sm text-zinc-500">No companies found.</p>
+            <p className="text-sm text-zinc-500">Ni najdenih podjetij.</p>
           </div>
         )}
 
         {data && data.total_pages > 1 && (
           <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
             <span className="text-xs text-zinc-500">
-              Page {data.page} of {data.total_pages}
+              Stran {data.page} od {data.total_pages}
             </span>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>

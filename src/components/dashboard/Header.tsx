@@ -21,7 +21,7 @@ export function Header({ title, subtitle, actions }: HeaderProps) {
         <button
           onClick={toggle}
           className="lg:hidden flex h-11 w-11 -ml-2 shrink-0 items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 transition-colors"
-          aria-label="Open menu"
+          aria-label="Odpri meni"
         >
           <Menu className="h-5 w-5" />
         </button>
@@ -41,7 +41,7 @@ export function Header({ title, subtitle, actions }: HeaderProps) {
           <div className="h-6 w-6 rounded-full bg-gradient-to-br from-radar-500 to-violet-600 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
             U
           </div>
-          <span className="hidden sm:inline">User</span>
+          <span className="hidden sm:inline">Uporabnik</span>
           <ChevronDown className="h-3 w-3 text-zinc-600 hidden sm:block" />
         </button>
       </div>

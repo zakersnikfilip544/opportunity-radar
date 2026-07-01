@@ -28,7 +28,7 @@ export default function SavedPage() {
       const data = await res.json();
       setSaved(Array.isArray(data) ? data : []);
     } catch {
-      toast.error("Failed to load saved opportunities");
+      toast.error("Nalaganje shranjenih priložnosti ni uspelo");
     } finally {
       setLoading(false);
     }
@@ -41,10 +41,10 @@ export default function SavedPage() {
       await fetch(`/api/saved?user_id=${DEMO_USER_ID}&opportunity_id=${opportunityId}`, {
         method: "DELETE",
       });
-      toast.success("Removed from pipeline");
+      toast.success("Odstranjeno iz cevovoda");
     } catch {
       setSaved(prev);
-      toast.error("Failed to remove");
+      toast.error("Odstranjevanje ni uspelo");
     }
   }
 
@@ -58,10 +58,10 @@ export default function SavedPage() {
         body: JSON.stringify({ opportunity_id: opportunityId, stage }),
       });
       if (!res.ok) throw new Error();
-      toast.success(`Moved to ${SAVED_STAGE_CONFIG[stage].label}`);
+      toast.success(`Premaknjeno v: ${SAVED_STAGE_CONFIG[stage].label}`);
     } catch {
       setSaved(prev);
-      toast.error("Failed to update stage");
+      toast.error("Posodobitev faze ni uspela");
     }
   }
 
@@ -71,8 +71,8 @@ export default function SavedPage() {
   return (
     <div>
       <Header
-        title="Saved"
-        subtitle={`${saved.length} in pipeline`}
+        title="Shranjeno"
+        subtitle={`${saved.length} v cevovodu`}
       />
 
       <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-[1600px] space-y-6">
@@ -83,9 +83,9 @@ export default function SavedPage() {
         ) : saved.length === 0 ? (
           <div className="text-center py-24 border border-dashed border-zinc-800 rounded-xl">
             <BookmarkCheck className="h-10 w-10 text-zinc-700 mx-auto mb-4" />
-            <h3 className="text-base font-semibold text-zinc-300 mb-2">Nothing saved yet</h3>
+            <h3 className="text-base font-semibold text-zinc-300 mb-2">Še nič shranjenega</h3>
             <p className="text-sm text-zinc-500">
-              Save opportunities from the feed to track them through your pipeline.
+              Shranite priložnosti iz seznama, da jih boste lahko spremljali skozi svoj cevovod.
             </p>
           </div>
         ) : (
@@ -104,7 +104,7 @@ export default function SavedPage() {
 
                   <div className="flex flex-col gap-3 rounded-xl border border-dashed border-zinc-800 bg-zinc-900/20 p-2 min-h-[120px]">
                     {items.length === 0 ? (
-                      <p className="text-xs text-zinc-700 text-center py-6">No opportunities here yet.</p>
+                      <p className="text-xs text-zinc-700 text-center py-6">Tu še ni priložnosti.</p>
                     ) : (
                       items.map((s) => (
                         <PipelineCard
@@ -157,7 +157,7 @@ function PipelineCard({
         <button
           onClick={() => onRemove(entry.opportunity_id)}
           className="p-1.5 rounded-md text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0"
-          title="Remove from pipeline"
+          title="Odstrani iz cevovoda"
         >
           <X className="h-3.5 w-3.5" />
         </button>

@@ -42,7 +42,7 @@ export default function DashboardPage() {
       setTopOpps(topData.data ?? []);
       setUrgentOpps(urgentData.data ?? []);
     } catch {
-      toast.error("Failed to load dashboard data");
+      toast.error("Nalaganje podatkov nadzorne plošče ni uspelo");
     } finally {
       setLoading(false);
     }
@@ -51,8 +51,8 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-zinc-950">
       <Header
-        title="Intelligence Dashboard"
-        subtitle="AI-powered business opportunity radar"
+        title="Nadzorna plošča"
+        subtitle="Radar poslovnih priložnosti z umetno inteligenco"
       />
 
       <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5 sm:space-y-6 max-w-[1400px]">
@@ -61,12 +61,12 @@ export default function DashboardPage() {
           <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 rounded-xl border border-yellow-500/20 bg-yellow-500/5 px-4 py-3">
             <Database className="h-4 w-4 text-yellow-400 shrink-0" />
             <p className="text-sm text-zinc-300 flex-1 min-w-[200px]">
-              <span className="font-medium text-yellow-400">Demo mode active</span>
-              {" — "} showing 40 sample opportunities. Connect Supabase to enable live data ingestion.
+              <span className="font-medium text-yellow-400">Način predstavitve je aktiven</span>
+              {" — "} prikazanih je 40 vzorčnih priložnosti. Povežite Supabase za omogočanje zajema podatkov v živo.
             </p>
             <Link href="/settings">
               <button className="text-xs text-yellow-400 hover:text-yellow-300 underline underline-offset-2 mr-2 transition-colors">
-                Configure
+                Nastavi
               </button>
             </Link>
             <button
@@ -88,7 +88,7 @@ export default function DashboardPage() {
           <div className="relative">
             <div className="flex items-center gap-2 mb-3">
               <Zap className="h-3.5 w-3.5 text-radar-400" />
-              <span className="text-xs font-semibold text-zinc-300 uppercase tracking-widest">AI Search</span>
+              <span className="text-xs font-semibold text-zinc-300 uppercase tracking-widest">AI iskanje</span>
             </div>
             <SearchBar />
           </div>
@@ -120,12 +120,12 @@ export default function DashboardPage() {
         <section>
           <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <div>
-              <h2 className="text-sm font-semibold text-zinc-200">Highest-Scored Opportunities</h2>
-              <p className="text-xs text-zinc-600 mt-0.5">Best opportunities by AI score</p>
+              <h2 className="text-sm font-semibold text-zinc-200">Najbolje ocenjene priložnosti</h2>
+              <p className="text-xs text-zinc-600 mt-0.5">Najboljše priložnosti po AI oceni</p>
             </div>
             <Link href="/opportunities?sort_by=opportunity_score&sort_order=desc">
               <Button variant="ghost" size="sm">
-                View all <ArrowRight className="h-3.5 w-3.5" />
+                Prikaži vse <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </Link>
           </div>
@@ -138,7 +138,7 @@ export default function DashboardPage() {
           {!loading && topOpps.length === 0 && (
             <div className="text-center py-12 border border-dashed border-zinc-800 rounded-xl">
               <Zap className="h-7 w-7 text-zinc-700 mx-auto mb-3" />
-              <p className="text-sm text-zinc-500">No opportunities yet — data loading.</p>
+              <p className="text-sm text-zinc-500">Trenutno ni priložnosti — nalaganje podatkov.</p>
             </div>
           )}
         </section>
@@ -149,13 +149,13 @@ export default function DashboardPage() {
             <div>
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-orange-400" />
-                <h2 className="text-sm font-semibold text-zinc-200">Requires Immediate Action</h2>
+                <h2 className="text-sm font-semibold text-zinc-200">Zahteva takojšnje ukrepanje</h2>
               </div>
-              <p className="text-xs text-zinc-600 mt-0.5">Critical & high-urgency opportunities</p>
+              <p className="text-xs text-zinc-600 mt-0.5">Kritične in zelo nujne priložnosti</p>
             </div>
             <Link href="/opportunities?urgency=critical&urgency=high">
               <Button variant="ghost" size="sm">
-                View all <ArrowRight className="h-3.5 w-3.5" />
+                Prikaži vse <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </Link>
           </div>
@@ -167,7 +167,7 @@ export default function DashboardPage() {
           </div>
           {!loading && urgentOpps.length === 0 && (
             <div className="py-8 text-center border border-dashed border-zinc-800 rounded-xl">
-              <p className="text-xs text-zinc-600">No high-urgency items right now.</p>
+              <p className="text-xs text-zinc-600">Trenutno ni zelo nujnih priložnosti.</p>
             </div>
           )}
         </section>

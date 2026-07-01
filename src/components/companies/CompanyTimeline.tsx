@@ -38,7 +38,7 @@ export function CompanyTimeline({ events = [], opportunities = [] }: CompanyTime
   if (!items.length) {
     return (
       <div className="text-center py-8 text-sm text-zinc-600">
-        No timeline events yet.
+        Trenutno ni dogodkov na časovnici.
       </div>
     );
   }
@@ -75,7 +75,7 @@ export function CompanyTimeline({ events = [], opportunities = [] }: CompanyTime
                       {typeConf.icon} {typeConf.label}
                     </span>
                   )}
-                  <span className="text-[10px] text-zinc-600">{formatDate(item.date, "MMM d, yyyy")}</span>
+                  <span className="text-[10px] text-zinc-600">{formatDate(item.date, "d. MMM yyyy")}</span>
                 </div>
               </div>
             </div>

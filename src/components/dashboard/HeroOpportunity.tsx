@@ -27,7 +27,7 @@ export function HeroOpportunity({ opportunity: opp }: HeroOpportunityProps) {
           <div className="flex items-center gap-2 mb-2">
             <Flame className="h-3.5 w-3.5 text-radar-400" />
             <span className="text-[11px] font-semibold text-radar-400 uppercase tracking-widest">
-              Best Opportunity Today
+              Najboljša priložnost danes
             </span>
           </div>
 
@@ -36,7 +36,7 @@ export function HeroOpportunity({ opportunity: opp }: HeroOpportunityProps) {
               {typeConfig.icon} {typeConfig.label}
             </span>
             <span className={cn("text-xs font-medium", urgencyConfig.color)}>
-              ● {urgencyConfig.label} urgency
+              ● {urgencyConfig.label} nujnost
             </span>
             {opp.country && (
               <span className="flex items-center gap-1 text-xs text-zinc-500">
@@ -58,12 +58,12 @@ export function HeroOpportunity({ opportunity: opp }: HeroOpportunityProps) {
 
           {opp.why_it_matters && (
             <p className="text-sm text-zinc-400 leading-relaxed mb-2">
-              <span className="text-zinc-300 font-medium">Why it matters: </span>
+              <span className="text-zinc-300 font-medium">Zakaj je pomembno: </span>
               {opp.why_it_matters}
             </p>
           )}
           <p className="text-sm text-zinc-400 leading-relaxed">
-            <span className="text-zinc-300 font-medium">Recommended action: </span>
+            <span className="text-zinc-300 font-medium">Priporočeno dejanje: </span>
             {recommendedAction}
           </p>
         </div>
@@ -71,7 +71,7 @@ export function HeroOpportunity({ opportunity: opp }: HeroOpportunityProps) {
         <div className="shrink-0 mx-auto lg:mx-0">
           <Link href={`/opportunities/${opp.id}`}>
             <Button variant="primary" size="lg">
-              View Strategy
+              Oglej si strategijo
               <ArrowUpRight className="h-4 w-4" />
             </Button>
           </Link>

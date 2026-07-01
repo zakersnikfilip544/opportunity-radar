@@ -71,11 +71,17 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
   const bestTimeToContact = opp.best_time_to_contact || deriveBestTimeToContact(opp);
 
   const scores = [
-    { label: "Opportunity", value: opp.opportunity_score || 0 },
-    { label: "Growth", value: opp.growth_score || 0 },
-    { label: "Sales Potential", value: opp.sales_potential || 0 },
-    { label: "Urgency", value: opp.urgency_score || 0 },
+    { label: "Priložnost", value: opp.opportunity_score || 0 },
+    { label: "Rast", value: opp.growth_score || 0 },
+    { label: "Prodajni potencial", value: opp.sales_potential || 0 },
+    { label: "Nujnost", value: opp.urgency_score || 0 },
   ];
+
+  const TAB_LABELS: Record<typeof activeTab, string> = {
+    overview: "Pregled",
+    outreach: "Nagovor",
+    ai: "AI analiza",
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -85,7 +91,7 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
         className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-200 transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to opportunities
+        Nazaj na priložnosti
       </Link>
 
       {/* Hero */}
@@ -101,26 +107,26 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
               {typeConfig.icon} {typeConfig.label}
             </span>
             <span className={cn("text-sm font-medium", urgencyConfig.color)}>
-              ● {urgencyConfig.label} urgency
+              ● {urgencyConfig.label} nujnost
             </span>
             {opp.is_verified && (
-              <Badge variant="success" size="sm">✓ Verified</Badge>
+              <Badge variant="success" size="sm">✓ Preverjeno</Badge>
             )}
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             {onSave && (
               <Button variant="outline" size="sm" onClick={onSave}>
                 {saved ? (
-                  <><BookmarkCheck className="h-3.5 w-3.5 text-radar-400" /> Saved</>
+                  <><BookmarkCheck className="h-3.5 w-3.5 text-radar-400" /> Shranjeno</>
                 ) : (
-                  <><Bookmark className="h-3.5 w-3.5" /> Save</>
+                  <><Bookmark className="h-3.5 w-3.5" /> Shrani</>
                 )}
               </Button>
             )}
             {opp.source_url && (
               <a href={opp.source_url} target="_blank" rel="noopener noreferrer">
                 <Button variant="secondary" size="sm">
-                  <ExternalLink className="h-3.5 w-3.5" /> Source
+                  <ExternalLink className="h-3.5 w-3.5" /> Vir
                 </Button>
               </a>
             )}
@@ -196,7 +202,7 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
                 : "text-zinc-500 hover:text-zinc-300"
             )}
           >
-            {tab === "ai" ? "AI Analysis" : tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {TAB_LABELS[tab]}
           </button>
         ))}
       </div>
@@ -209,7 +215,7 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Lightbulb className="h-4 w-4 text-yellow-400" />
-                  <h3 className="text-sm font-semibold text-zinc-200">Why This Matters</h3>
+                  <h3 className="text-sm font-semibold text-zinc-200">Zakaj je to pomembno</h3>
                 </div>
               </CardHeader>
               <CardContent>
@@ -223,7 +229,7 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Target className="h-4 w-4 text-radar-400" />
-                  <h3 className="text-sm font-semibold text-zinc-200">Suggested Action</h3>
+                  <h3 className="text-sm font-semibold text-zinc-200">Predlagano dejanje</h3>
                 </div>
               </CardHeader>
               <CardContent>
@@ -236,7 +242,7 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Compass className="h-4 w-4 text-pink-400" />
-                <h3 className="text-sm font-semibold text-zinc-200">Sales Angle</h3>
+                <h3 className="text-sm font-semibold text-zinc-200">Prodajni pristop</h3>
               </div>
             </CardHeader>
             <CardContent>
@@ -248,7 +254,7 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
             <CardHeader>
               <div className="flex items-center gap-2">
                 <CalendarClock className="h-4 w-4 text-cyan-400" />
-                <h3 className="text-sm font-semibold text-zinc-200">Best Time to Contact</h3>
+                <h3 className="text-sm font-semibold text-zinc-200">Najboljši čas za stik</h3>
               </div>
             </CardHeader>
             <CardContent>
@@ -261,13 +267,13 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-blue-400" />
-                  <h3 className="text-sm font-semibold text-zinc-200">Who Should Act</h3>
+                  <h3 className="text-sm font-semibold text-zinc-200">Kdo naj ukrepa</h3>
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
                 {opp.potential_buyers?.length && (
                   <div>
-                    <p className="text-xs text-zinc-600 mb-2 uppercase tracking-wider">Potential Buyers</p>
+                    <p className="text-xs text-zinc-600 mb-2 uppercase tracking-wider">Potencialni kupci</p>
                     <div className="flex flex-wrap gap-1.5">
                       {opp.potential_buyers.map((b) => (
                         <Badge key={b} variant="info" size="sm">{b}</Badge>
@@ -277,7 +283,7 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
                 )}
                 {opp.target_roles?.length && (
                   <div>
-                    <p className="text-xs text-zinc-600 mb-2 uppercase tracking-wider">Contact Roles</p>
+                    <p className="text-xs text-zinc-600 mb-2 uppercase tracking-wider">Kontaktne vloge</p>
                     <div className="flex flex-wrap gap-1.5">
                       {opp.target_roles.map((r) => (
                         <Badge key={r} variant="default" size="sm">{r}</Badge>
@@ -294,7 +300,7 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-violet-400" />
-                  <h3 className="text-sm font-semibold text-zinc-200">Services to Offer</h3>
+                  <h3 className="text-sm font-semibold text-zinc-200">Storitve, ki jih lahko ponudite</h3>
                 </div>
               </CardHeader>
               <CardContent>
@@ -319,7 +325,7 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4 text-radar-400" />
-                    <h3 className="text-sm font-semibold text-zinc-200">Cold Email Template</h3>
+                    <h3 className="text-sm font-semibold text-zinc-200">Predloga hladnega e-maila</h3>
                   </div>
                   <CopyButton text={opp.cold_email} />
                 </div>
@@ -338,7 +344,7 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Linkedin className="h-4 w-4 text-blue-400" />
-                    <h3 className="text-sm font-semibold text-zinc-200">LinkedIn Message</h3>
+                    <h3 className="text-sm font-semibold text-zinc-200">LinkedIn sporočilo</h3>
                   </div>
                   <CopyButton text={opp.linkedin_message} />
                 </div>
@@ -356,14 +362,14 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
       {activeTab === "ai" && (
         <Card>
           <CardHeader>
-            <h3 className="text-sm font-semibold text-zinc-200">Full AI Analysis</h3>
+            <h3 className="text-sm font-semibold text-zinc-200">Celotna AI analiza</h3>
             <p className="text-xs text-zinc-600 mt-0.5">
-              Confidence: {opp.confidence_score || 0}/100 · Competition level: {opp.competition_level || 0}/100
+              Zanesljivost: {opp.confidence_score || 0}/100 · Raven konkurence: {opp.competition_level || 0}/100
             </p>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-zinc-400 leading-relaxed whitespace-pre-line">
-              {opp.full_analysis || "No detailed analysis available."}
+              {opp.full_analysis || "Podrobna analiza ni na voljo."}
             </p>
           </CardContent>
         </Card>
@@ -383,7 +389,7 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
         <CardHeader>
           <div className="flex items-center gap-2">
             <Newspaper className="h-4 w-4 text-zinc-500" />
-            <h3 className="text-sm font-semibold text-zinc-200">Source</h3>
+            <h3 className="text-sm font-semibold text-zinc-200">Vir</h3>
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
@@ -401,7 +407,7 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
           ) : (
             <span className="inline-flex items-center gap-1.5 text-xs text-zinc-600 italic">
               <Link2 className="h-3 w-3 shrink-0" />
-              No source URL available
+              URL vira ni na voljo
             </span>
           )}
         </CardContent>
@@ -413,7 +419,7 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
           <div className="flex items-center gap-2 mb-4">
             <Building2 className="h-4 w-4 text-zinc-500" />
             <h3 className="text-sm font-semibold text-zinc-200">
-              More from {opp.company?.name ?? "this company"}
+              Več od {opp.company?.name ?? "tega podjetja"}
             </h3>
           </div>
           <div className="grid md:grid-cols-2 gap-4">

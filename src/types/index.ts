@@ -301,36 +301,36 @@ export const OPPORTUNITY_TYPE_CONFIG: Record<
   OpportunityType,
   { label: string; color: string; icon: string }
 > = {
-  funding: { label: "Funding", color: "bg-violet-500/20 text-violet-300 border-violet-500/30", icon: "💰" },
-  hiring: { label: "Hiring", color: "bg-blue-500/20 text-blue-300 border-blue-500/30", icon: "👥" },
-  expansion: { label: "Expansion", color: "bg-green-500/20 text-green-300 border-green-500/30", icon: "📈" },
-  construction: { label: "Construction", color: "bg-orange-500/20 text-orange-300 border-orange-500/30", icon: "🏗️" },
-  government_tender: { label: "Gov. Tender", color: "bg-red-500/20 text-red-300 border-red-500/30", icon: "🏛️" },
-  acquisition: { label: "Acquisition", color: "bg-pink-500/20 text-pink-300 border-pink-500/30", icon: "🤝" },
-  investment: { label: "Investment", color: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30", icon: "📊" },
-  factory_expansion: { label: "Factory Expansion", color: "bg-amber-500/20 text-amber-300 border-amber-500/30", icon: "🏭" },
-  new_product: { label: "New Product", color: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30", icon: "🚀" },
-  technology_adoption: { label: "Tech Adoption", color: "bg-teal-500/20 text-teal-300 border-teal-500/30", icon: "💻" },
-  energy_project: { label: "Energy Project", color: "bg-lime-500/20 text-lime-300 border-lime-500/30", icon: "⚡" },
-  digital_transformation: { label: "Digital Transform.", color: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30", icon: "🔄" },
-  partnership: { label: "Partnership", color: "bg-sky-500/20 text-sky-300 border-sky-500/30", icon: "🔗" },
-  ipo: { label: "IPO", color: "bg-rose-500/20 text-rose-300 border-rose-500/30", icon: "📣" },
-  other: { label: "Other", color: "bg-zinc-500/20 text-zinc-300 border-zinc-500/30", icon: "📌" },
+  funding: { label: "Financiranje", color: "bg-violet-500/20 text-violet-300 border-violet-500/30", icon: "💰" },
+  hiring: { label: "Zaposlovanje", color: "bg-blue-500/20 text-blue-300 border-blue-500/30", icon: "👥" },
+  expansion: { label: "Širitev", color: "bg-green-500/20 text-green-300 border-green-500/30", icon: "📈" },
+  construction: { label: "Gradnja", color: "bg-orange-500/20 text-orange-300 border-orange-500/30", icon: "🏗️" },
+  government_tender: { label: "Javni razpis", color: "bg-red-500/20 text-red-300 border-red-500/30", icon: "🏛️" },
+  acquisition: { label: "Prevzem", color: "bg-pink-500/20 text-pink-300 border-pink-500/30", icon: "🤝" },
+  investment: { label: "Naložba", color: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30", icon: "📊" },
+  factory_expansion: { label: "Širitev tovarne", color: "bg-amber-500/20 text-amber-300 border-amber-500/30", icon: "🏭" },
+  new_product: { label: "Nov izdelek", color: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30", icon: "🚀" },
+  technology_adoption: { label: "Uvajanje tehnologije", color: "bg-teal-500/20 text-teal-300 border-teal-500/30", icon: "💻" },
+  energy_project: { label: "Energetski projekt", color: "bg-lime-500/20 text-lime-300 border-lime-500/30", icon: "⚡" },
+  digital_transformation: { label: "Digitalna preobrazba", color: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30", icon: "🔄" },
+  partnership: { label: "Partnerstvo", color: "bg-sky-500/20 text-sky-300 border-sky-500/30", icon: "🔗" },
+  ipo: { label: "Prva javna ponudba", color: "bg-rose-500/20 text-rose-300 border-rose-500/30", icon: "📣" },
+  other: { label: "Drugo", color: "bg-zinc-500/20 text-zinc-300 border-zinc-500/30", icon: "📌" },
 };
 
 export const URGENCY_CONFIG: Record<UrgencyLevel, { label: string; color: string }> = {
-  low: { label: "Low", color: "text-zinc-400" },
-  medium: { label: "Medium", color: "text-yellow-400" },
-  high: { label: "High", color: "text-orange-400" },
-  critical: { label: "Critical", color: "text-red-400" },
+  low: { label: "Nizka", color: "text-zinc-400" },
+  medium: { label: "Srednja", color: "text-yellow-400" },
+  high: { label: "Visoka", color: "text-orange-400" },
+  critical: { label: "Kritična", color: "text-red-400" },
 };
 
 export const SAVED_STAGE_CONFIG: Record<SavedStage, { label: string; color: string }> = {
-  saved: { label: "Saved", color: "bg-zinc-500/15 text-zinc-300 border-zinc-500/30" },
-  contacted: { label: "Contacted", color: "bg-blue-500/15 text-blue-300 border-blue-500/30" },
-  meeting: { label: "Meeting", color: "bg-violet-500/15 text-violet-300 border-violet-500/30" },
-  won: { label: "Won", color: "bg-green-500/15 text-green-300 border-green-500/30" },
-  lost: { label: "Lost", color: "bg-red-500/15 text-red-300 border-red-500/30" },
+  saved: { label: "Shranjeno", color: "bg-zinc-500/15 text-zinc-300 border-zinc-500/30" },
+  contacted: { label: "Kontaktirano", color: "bg-blue-500/15 text-blue-300 border-blue-500/30" },
+  meeting: { label: "Sestanek", color: "bg-violet-500/15 text-violet-300 border-violet-500/30" },
+  won: { label: "Pridobljeno", color: "bg-green-500/15 text-green-300 border-green-500/30" },
+  lost: { label: "Izgubljeno", color: "bg-red-500/15 text-red-300 border-red-500/30" },
 };
 
 export const SAVED_STAGE_ORDER: SavedStage[] = ["saved", "contacted", "meeting", "won", "lost"];

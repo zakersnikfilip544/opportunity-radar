@@ -9,7 +9,8 @@ import {
   Calendar, TrendingUp, Zap, AlertTriangle,
   DollarSign, Target, RefreshCw, ChevronRight,
 } from "lucide-react";
-import type { DailyDigest, Opportunity } from "@/types";
+import { OPPORTUNITY_TYPE_CONFIG } from "@/types";
+import type { DailyDigest, Opportunity, OpportunityType } from "@/types";
 import { formatDate, parseValueRange } from "@/lib/utils/helpers";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
@@ -41,13 +42,13 @@ export default function DigestPage() {
         headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET || "dev"}` },
       });
       if (res.ok) {
-        toast.success("Digest generated!");
+        toast.success("Pregled je ustvarjen!");
         await fetchDigest();
       } else {
         const err = await res.json();
-        toast.error(err.error || "Failed");
+        toast.error(err.error || "Neuspešno");
       }
-    } catch { toast.error("Failed to generate digest"); }
+    } catch { toast.error("Ustvarjanje pregleda ni uspelo"); }
     finally { setGenerating(false); }
   }
 
@@ -70,12 +71,12 @@ export default function DigestPage() {
   return (
     <div className="min-h-screen bg-zinc-950">
       <Header
-        title="Daily Intelligence Briefing"
-        subtitle={formatDate(new Date().toISOString(), "EEEE, MMMM d, yyyy")}
+        title="Dnevni pregled"
+        subtitle={formatDate(new Date().toISOString(), "EEEE, d. MMMM yyyy")}
         actions={
           <Button variant="ghost" size="sm" onClick={generateDigest} loading={generating}>
             <RefreshCw className="h-3.5 w-3.5" />
-            {digest ? "Regenerate" : "Generate"}
+            {digest ? "Ponovno ustvari" : "Ustvari"}
           </Button>
         }
       />
@@ -93,13 +94,13 @@ export default function DigestPage() {
             <div className="h-14 w-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto mb-4">
               <Calendar className="h-6 w-6 text-zinc-600" />
             </div>
-            <h3 className="text-base font-semibold text-zinc-300 mb-2">No Briefing Yet</h3>
+            <h3 className="text-base font-semibold text-zinc-300 mb-2">Poročilo še ni pripravljeno</h3>
             <p className="text-sm text-zinc-600 mb-6 max-w-xs mx-auto">
-              Generate today's executive intelligence briefing — curated opportunities, analyzed by AI.
+              Ustvarite današnje vodstveno obveščevalno poročilo — izbrane priložnosti, analizirane z umetno inteligenco.
             </p>
             <Button variant="primary" onClick={generateDigest} loading={generating}>
               <Zap className="h-4 w-4" />
-              Generate Today's Briefing
+              Ustvari današnji pregled
             </Button>
           </div>
         ) : (
@@ -111,7 +112,7 @@ export default function DigestPage() {
                 <div className="flex items-center gap-2 mb-3">
                   <Zap className="h-4 w-4 text-radar-400" />
                   <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest">
-                    Executive Intelligence Briefing
+                    Vodstveno obveščevalno poročilo
                   </span>
                 </div>
                 <h1 className="text-xl sm:text-2xl font-bold text-white mb-3 leading-tight">{digest.title}</h1>
@@ -126,19 +127,19 @@ export default function DigestPage() {
                       <div className="text-xl sm:text-3xl font-bold text-radar-400 mb-1">
                         {digest.stats.total_opportunities}
                       </div>
-                      <div className="text-[10px] sm:text-xs text-zinc-600 uppercase tracking-wider">Opportunities</div>
+                      <div className="text-[10px] sm:text-xs text-zinc-600 uppercase tracking-wider">Priložnosti</div>
                     </div>
                     <div>
                       <div className="text-xl sm:text-3xl font-bold text-yellow-400 mb-1">
                         {digest.stats.avg_opportunity_score}
                       </div>
-                      <div className="text-[10px] sm:text-xs text-zinc-600 uppercase tracking-wider">Avg Score</div>
+                      <div className="text-[10px] sm:text-xs text-zinc-600 uppercase tracking-wider">Povp. ocena</div>
                     </div>
                     <div>
                       <div className="text-xl sm:text-3xl font-bold text-orange-400 mb-1">
                         {digest.stats.high_urgency_count ?? 0}
                       </div>
-                      <div className="text-[10px] sm:text-xs text-zinc-600 uppercase tracking-wider">High Urgency</div>
+                      <div className="text-[10px] sm:text-xs text-zinc-600 uppercase tracking-wider">Visoka nujnost</div>
                     </div>
                     <div>
                       <div className="text-xl sm:text-3xl font-bold text-green-400 mb-1">
@@ -146,7 +147,7 @@ export default function DigestPage() {
                           ? parseValueRange(biggestDeal.estimated_value_min, biggestDeal.estimated_value_max, biggestDeal.estimated_value_currency)
                           : "—"}
                       </div>
-                      <div className="text-[10px] sm:text-xs text-zinc-600 uppercase tracking-wider">Biggest Deal</div>
+                      <div className="text-[10px] sm:text-xs text-zinc-600 uppercase tracking-wider">Največji posel</div>
                     </div>
                   </div>
                 )}
@@ -158,8 +159,8 @@ export default function DigestPage() {
               <section>
                 <SectionHeader
                   icon={<AlertTriangle className="h-4 w-4 text-orange-400" />}
-                  title="Requires Immediate Action"
-                  subtitle="Critical and high-urgency — act within 24-48 hours"
+                  title="Zahteva takojšnje ukrepanje"
+                  subtitle="Kritično in zelo nujno — ukrepajte v 24–48 urah"
                   accent="text-orange-400"
                 />
                 <div className="grid md:grid-cols-2 gap-4">
@@ -174,8 +175,8 @@ export default function DigestPage() {
             <section>
               <SectionHeader
                 icon={<TrendingUp className="h-4 w-4 text-radar-400" />}
-                title="Top 10 Opportunities"
-                subtitle="Highest-scored opportunities by AI relevance and potential"
+                title="10 najboljših priložnosti"
+                subtitle="Najbolje ocenjene priložnosti po AI relevantnosti in potencialu"
                 accent="text-radar-400"
               />
               <div className="grid md:grid-cols-2 gap-4">
@@ -190,8 +191,8 @@ export default function DigestPage() {
               <section>
                 <SectionHeader
                   icon={<DollarSign className="h-4 w-4 text-green-400" />}
-                  title="Money in Motion"
-                  subtitle="Opportunities with known estimated contract or deal value, biggest first"
+                  title="Denar v gibanju"
+                  subtitle="Priložnosti z znano ocenjeno vrednostjo posla, od največje naprej"
                   accent="text-green-400"
                 />
                 <div className="grid md:grid-cols-2 gap-4">
@@ -206,8 +207,8 @@ export default function DigestPage() {
             <section>
               <SectionHeader
                 icon={<Target className="h-4 w-4 text-violet-400" />}
-                title="Full Briefing"
-                subtitle={`All ${opps.length} opportunities discovered today`}
+                title="Celotno poročilo"
+                subtitle={`Vseh ${opps.length} priložnosti, odkritih danes`}
                 accent="text-violet-400"
               />
               <div className="grid md:grid-cols-2 gap-4">
@@ -221,27 +222,27 @@ export default function DigestPage() {
             {digest.stats && (
               <div className="grid md:grid-cols-3 gap-4 pt-2">
                 <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
-                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">By Type</p>
+                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Po vrsti</p>
                   <div className="flex flex-wrap gap-1.5">
                     {Object.entries(digest.stats.by_type ?? {}).map(([type, count]) => (
                       <span key={type} className="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-700">
-                        {type.replace(/_/g, " ")} · {count}
+                        {OPPORTUNITY_TYPE_CONFIG[type as OpportunityType]?.label ?? type} · {count}
                       </span>
                     ))}
                   </div>
                 </div>
                 <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
-                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Top Countries</p>
+                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Vodilne države</p>
                   <div className="flex flex-wrap gap-1.5">
                     {topCountries.map(([country, count]) => (
                       <span key={country} className="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-700">
-                        {country || "Unknown"} · {count}
+                        {country || "Neznano"} · {count}
                       </span>
                     ))}
                   </div>
                 </div>
                 <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
-                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Top Industries</p>
+                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Vodilne panoge</p>
                   <div className="flex flex-wrap gap-1.5">
                     {topIndustries.map(([industry, count]) => (
                       <span key={industry} className="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-700">

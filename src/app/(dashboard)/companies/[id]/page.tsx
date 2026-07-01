@@ -42,7 +42,7 @@ export default function CompanyPage() {
         setOpportunities(data.opportunities || []);
         setEvents(data.events || []);
       } catch {
-        toast.error("Failed to load company");
+        toast.error("Nalaganje podjetja ni uspelo");
       } finally {
         setLoading(false);
       }
@@ -53,7 +53,7 @@ export default function CompanyPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-zinc-950">
-        <Header title="Company" />
+        <Header title="Podjetje" />
         <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 grid md:grid-cols-3 gap-6 max-w-6xl">
           <CardSkeleton />
           <div className="md:col-span-2 space-y-4">
@@ -68,11 +68,11 @@ export default function CompanyPage() {
   if (!company) {
     return (
       <div className="min-h-screen bg-zinc-950">
-        <Header title="Not Found" />
+        <Header title="Ni najdeno" />
         <div className="px-4 sm:px-8 py-20 text-center">
           <Building2 className="h-10 w-10 text-zinc-700 mx-auto mb-4" />
-          <p className="text-sm text-zinc-500 mb-4">Company not found.</p>
-          <Link href="/companies" className="text-radar-400 text-sm hover:text-radar-300">← Back to companies</Link>
+          <p className="text-sm text-zinc-500 mb-4">Podjetje ni najdeno.</p>
+          <Link href="/companies" className="text-radar-400 text-sm hover:text-radar-300">← Nazaj na podjetja</Link>
         </div>
       </div>
     );
@@ -96,12 +96,12 @@ export default function CompanyPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950">
-      <Header title={company.name} subtitle={company.industry ?? "Company"} />
+      <Header title={company.name} subtitle={company.industry ?? "Podjetje"} />
 
       <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-6xl space-y-6">
         <Link href="/companies" className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-200 transition-colors">
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back to companies
+          Nazaj na podjetja
         </Link>
 
         <div className="grid md:grid-cols-3 gap-6">
@@ -152,19 +152,19 @@ export default function CompanyPage() {
                       className="flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300 transition-colors"
                     >
                       <Linkedin className="h-3.5 w-3.5 shrink-0" />
-                      LinkedIn Profile
+                      LinkedIn profil
                     </a>
                   )}
                   {company.employee_count_range && (
                     <div className="flex items-center gap-2 text-xs text-zinc-500">
                       <Users className="h-3.5 w-3.5 text-zinc-600 shrink-0" />
-                      {company.employee_count_range} employees
+                      {company.employee_count_range} zaposlenih
                     </div>
                   )}
                   {company.founded_year && (
                     <div className="flex items-center gap-2 text-xs text-zinc-500">
                       <Calendar className="h-3.5 w-3.5 text-zinc-600 shrink-0" />
-                      Founded {company.founded_year}
+                      Ustanovljeno leta {company.founded_year}
                     </div>
                   )}
                 </div>
@@ -185,18 +185,18 @@ export default function CompanyPage() {
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Zap className="h-3.5 w-3.5 text-radar-400" />
-                    <h3 className="text-sm font-semibold text-zinc-200">AI Summary</h3>
+                    <h3 className="text-sm font-semibold text-zinc-200">Povzetek AI</h3>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-zinc-600">Opportunities</span>
+                      <span className="text-xs text-zinc-600">Priložnosti</span>
                       <span className="text-sm font-bold text-zinc-200">{opportunities.length}</span>
                     </div>
                     {avgScore != null && (
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-zinc-600">Avg Score</span>
+                        <span className="text-xs text-zinc-600">Povp. ocena</span>
                         <span className={`text-sm font-bold ${avgScore >= 70 ? "text-green-400" : avgScore >= 50 ? "text-yellow-400" : "text-orange-400"}`}>
                           {avgScore} / 100
                         </span>
@@ -204,7 +204,7 @@ export default function CompanyPage() {
                     )}
                     {dominantType && OPPORTUNITY_TYPE_CONFIG[dominantType as OpportunityType] && (
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-zinc-600">Primary Signal</span>
+                        <span className="text-xs text-zinc-600">Prevladujoč signal</span>
                         <span className={`text-xs font-medium px-2 py-0.5 rounded-md border ${OPPORTUNITY_TYPE_CONFIG[dominantType as OpportunityType].color}`}>
                           {OPPORTUNITY_TYPE_CONFIG[dominantType as OpportunityType].icon} {OPPORTUNITY_TYPE_CONFIG[dominantType as OpportunityType].label}
                         </span>
@@ -219,10 +219,10 @@ export default function CompanyPage() {
                       </div>
                       <p className="text-[10px] text-zinc-700 mt-1.5">
                         {avgScore && avgScore >= 70
-                          ? "High-value target — prioritize outreach"
+                          ? "Zelo vredna tarča — dajte prednost stiku"
                           : avgScore && avgScore >= 50
-                          ? "Moderate potential — monitor closely"
-                          : "Early signal — track for development"}
+                          ? "Zmeren potencial — spremljajte pozorno"
+                          : "Zgodnji signal — spremljajte razvoj"}
                       </p>
                     </div>
                   </div>
@@ -235,7 +235,7 @@ export default function CompanyPage() {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <TrendingUp className="h-3.5 w-3.5 text-zinc-500" />
-                  <h3 className="text-sm font-semibold text-zinc-200">Timeline</h3>
+                  <h3 className="text-sm font-semibold text-zinc-200">Časovnica</h3>
                 </div>
               </CardHeader>
               <CardContent>
@@ -251,13 +251,13 @@ export default function CompanyPage() {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 mb-1">
                   <MessageSquare className="h-3.5 w-3.5 text-zinc-500" />
-                  <h3 className="text-sm font-semibold text-zinc-300">Suggested Outreach</h3>
+                  <h3 className="text-sm font-semibold text-zinc-300">Predlagan nagovor</h3>
                 </div>
                 {coldEmail && (
                   <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <Mail className="h-3.5 w-3.5 text-blue-400" />
-                      <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">Cold Email</span>
+                      <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">Hladen e-mail</span>
                     </div>
                     <p className="text-xs text-zinc-400 leading-relaxed whitespace-pre-wrap">{coldEmail}</p>
                   </div>
@@ -266,7 +266,7 @@ export default function CompanyPage() {
                   <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <Linkedin className="h-3.5 w-3.5 text-blue-500" />
-                      <span className="text-xs font-semibold text-blue-500 uppercase tracking-wider">LinkedIn Message</span>
+                      <span className="text-xs font-semibold text-blue-500 uppercase tracking-wider">LinkedIn sporočilo</span>
                     </div>
                     <p className="text-xs text-zinc-400 leading-relaxed whitespace-pre-wrap">{linkedinMsg}</p>
                   </div>
@@ -278,14 +278,14 @@ export default function CompanyPage() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <h3 className="text-sm font-semibold text-zinc-200">
-                  Opportunities
+                  Priložnosti
                 </h3>
                 <span className="text-xs text-zinc-600 bg-zinc-800 px-2 py-0.5 rounded-full">{opportunities.length}</span>
               </div>
               {opportunities.length === 0 ? (
                 <div className="text-center py-12 border border-dashed border-zinc-800 rounded-xl">
                   <Building2 className="h-7 w-7 text-zinc-700 mx-auto mb-3" />
-                  <p className="text-sm text-zinc-600">No opportunities tracked yet.</p>
+                  <p className="text-sm text-zinc-600">Trenutno ni spremljanih priložnosti.</p>
                 </div>
               ) : (
                 <div className="space-y-3">

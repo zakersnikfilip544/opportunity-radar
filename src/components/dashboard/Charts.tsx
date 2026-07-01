@@ -14,8 +14,9 @@ import {
   TooltipProps,
 } from "recharts";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import type { DashboardStats } from "@/types";
+import { OPPORTUNITY_TYPE_CONFIG, type DashboardStats, type OpportunityType } from "@/types";
 import { format, parseISO } from "date-fns";
+import { sl } from "date-fns/locale";
 
 const TYPE_COLORS = ["#22c55e", "#8b5cf6", "#f59e0b", "#3b82f6", "#ef4444", "#06b6d4", "#f97316", "#ec4899", "#a3e635"];
 
@@ -30,7 +31,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
         <p className="text-[11px] text-zinc-500 mb-1">{label}</p>
         {payload.map((p, i) => (
           <p key={i} className="text-xs font-semibold" style={{ color: p.color ?? "#22c55e" }}>
-            {p.value} opportunities
+            {p.value} priložnosti
           </p>
         ))}
       </div>
@@ -53,7 +54,7 @@ const BarTooltip = ({ active, payload, label }: TooltipProps<number, string>) =>
 
 export function TimelineChart({ stats }: ChartsProps) {
   const data = (stats?.timeline ?? []).map((d) => ({
-    date: format(parseISO(d.date), "MMM d"),
+    date: format(parseISO(d.date), "d. MMM", { locale: sl }),
     count: d.count,
   }));
 
@@ -62,10 +63,10 @@ export function TimelineChart({ stats }: ChartsProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-zinc-200">Opportunity Flow</h3>
-            <p className="text-xs text-zinc-600 mt-0.5">Discoveries over the last 14 days</p>
+            <h3 className="text-sm font-semibold text-zinc-200">Tok priložnosti</h3>
+            <p className="text-xs text-zinc-600 mt-0.5">Odkritja v zadnjih 14 dneh</p>
           </div>
-          <span className="text-xs text-radar-400 font-medium">{data.reduce((s, d) => s + d.count, 0)} total</span>
+          <span className="text-xs text-radar-400 font-medium">{data.reduce((s, d) => s + d.count, 0)} skupaj</span>
         </div>
       </CardHeader>
       <CardContent>
@@ -102,15 +103,15 @@ export function TypeDistributionChart({ stats }: ChartsProps) {
     .sort((a, b) => b.count - a.count)
     .slice(0, 8)
     .map((d) => ({
-      name: d.type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+      name: OPPORTUNITY_TYPE_CONFIG[d.type as OpportunityType]?.label ?? d.type,
       count: d.count,
     }));
 
   return (
     <Card>
       <CardHeader>
-        <h3 className="text-sm font-semibold text-zinc-200">By Opportunity Type</h3>
-        <p className="text-xs text-zinc-600 mt-0.5">Distribution across {data.length} types</p>
+        <h3 className="text-sm font-semibold text-zinc-200">Po vrsti priložnosti</h3>
+        <p className="text-xs text-zinc-600 mt-0.5">Porazdelitev po {data.length} vrstah</p>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={200}>
@@ -145,8 +146,8 @@ export function CountryChart({ stats }: ChartsProps) {
   return (
     <Card>
       <CardHeader>
-        <h3 className="text-sm font-semibold text-zinc-200">Top Countries</h3>
-        <p className="text-xs text-zinc-600 mt-0.5">Geographic distribution</p>
+        <h3 className="text-sm font-semibold text-zinc-200">Vodilne države</h3>
+        <p className="text-xs text-zinc-600 mt-0.5">Geografska porazdelitev</p>
       </CardHeader>
       <CardContent>
         <div className="space-y-3.5">
@@ -155,7 +156,7 @@ export function CountryChart({ stats }: ChartsProps) {
               <span className="text-[11px] text-zinc-600 w-4 shrink-0">{i + 1}</span>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs text-zinc-300 truncate">{d.country || "Unknown"}</span>
+                  <span className="text-xs text-zinc-300 truncate">{d.country || "Neznano"}</span>
                   <span className="text-[11px] text-zinc-500 ml-2 shrink-0">{d.count}</span>
                 </div>
                 <div className="h-1 rounded-full bg-zinc-800 overflow-hidden">
@@ -168,7 +169,7 @@ export function CountryChart({ stats }: ChartsProps) {
             </div>
           ))}
           {data.length === 0 && (
-            <p className="text-xs text-zinc-600 text-center py-4">No data yet</p>
+            <p className="text-xs text-zinc-600 text-center py-4">Ni še podatkov</p>
           )}
         </div>
       </CardContent>
@@ -178,10 +179,10 @@ export function CountryChart({ stats }: ChartsProps) {
 
 export function UrgencyBreakdownChart({ stats }: ChartsProps) {
   const urgencyData = [
-    { name: "Critical", count: 0, color: "#ef4444", bg: "bg-red-500/10", text: "text-red-400" },
-    { name: "High",     count: 0, color: "#f97316", bg: "bg-orange-500/10", text: "text-orange-400" },
-    { name: "Medium",   count: 0, color: "#f59e0b", bg: "bg-yellow-500/10", text: "text-yellow-400" },
-    { name: "Low",      count: 0, color: "#71717a", bg: "bg-zinc-700/30",   text: "text-zinc-400" },
+    { name: "Kritično", count: 0, color: "#ef4444", bg: "bg-red-500/10", text: "text-red-400" },
+    { name: "Visoko",   count: 0, color: "#f97316", bg: "bg-orange-500/10", text: "text-orange-400" },
+    { name: "Srednje",  count: 0, color: "#f59e0b", bg: "bg-yellow-500/10", text: "text-yellow-400" },
+    { name: "Nizko",    count: 0, color: "#71717a", bg: "bg-zinc-700/30",   text: "text-zinc-400" },
   ];
 
   // Derive from high_urgency if breakdown not available
@@ -197,8 +198,8 @@ export function UrgencyBreakdownChart({ stats }: ChartsProps) {
   return (
     <Card>
       <CardHeader>
-        <h3 className="text-sm font-semibold text-zinc-200">Urgency Breakdown</h3>
-        <p className="text-xs text-zinc-600 mt-0.5">Action priority distribution</p>
+        <h3 className="text-sm font-semibold text-zinc-200">Razčlenitev nujnosti</h3>
+        <p className="text-xs text-zinc-600 mt-0.5">Porazdelitev prioritete ukrepanja</p>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
@@ -235,8 +236,8 @@ export function IndustryChart({ stats }: ChartsProps) {
   return (
     <Card>
       <CardHeader>
-        <h3 className="text-sm font-semibold text-zinc-200">Top Industries</h3>
-        <p className="text-xs text-zinc-600 mt-0.5">Where opportunities are clustering</p>
+        <h3 className="text-sm font-semibold text-zinc-200">Vodilne panoge</h3>
+        <p className="text-xs text-zinc-600 mt-0.5">Kje se priložnosti kopičijo</p>
       </CardHeader>
       <CardContent>
         <div className="space-y-3.5">
@@ -245,7 +246,7 @@ export function IndustryChart({ stats }: ChartsProps) {
               <span className="text-[11px] text-zinc-600 w-4 shrink-0">{i + 1}</span>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs text-zinc-300 truncate">{d.industry || "Other"}</span>
+                  <span className="text-xs text-zinc-300 truncate">{d.industry || "Drugo"}</span>
                   <span className="text-[11px] text-zinc-500 ml-2 shrink-0">{d.count}</span>
                 </div>
                 <div className="h-1 rounded-full bg-zinc-800 overflow-hidden">
@@ -258,7 +259,7 @@ export function IndustryChart({ stats }: ChartsProps) {
             </div>
           ))}
           {data.length === 0 && (
-            <p className="text-xs text-zinc-600 text-center py-4">No data yet</p>
+            <p className="text-xs text-zinc-600 text-center py-4">Ni še podatkov</p>
           )}
         </div>
       </CardContent>

@@ -6,11 +6,11 @@ import type { Source } from "@/types";
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Nepooblaščen dostop" }, { status: 401 });
   }
 
   if (!isSupabaseConfigured()) {
-    return NextResponse.json({ error: "Database not configured" }, { status: 503 });
+    return NextResponse.json({ error: "Podatkovna baza ni nastavljena" }, { status: 503 });
   }
 
   const body = await req.json().catch(() => ({}));
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
         .select("*")
         .eq("id", sourceId)
         .single();
-      if (!source) return NextResponse.json({ error: "Source not found" }, { status: 404 });
+      if (!source) return NextResponse.json({ error: "Vir ni najden" }, { status: 404 });
       results = [await scrapeSource(source as Source)];
     } else {
       results = await scrapeAllSources();
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, results, totals });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : "Unknown error";
+    const msg = error instanceof Error ? error.message : "Neznana napaka";
     if (log) {
       await supabase
         .from("scrape_logs")
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Nepooblaščen dostop" }, { status: 401 });
   }
 
   const supabase = createAdminClient();

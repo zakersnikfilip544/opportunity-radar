@@ -37,7 +37,7 @@ function SearchPageContent() {
       setResults(data.data || []);
       setFilters(data.filters || null);
     } catch {
-      toast.error("Search failed");
+      toast.error("Iskanje ni uspelo");
     } finally {
       setLoading(false);
     }
@@ -50,8 +50,8 @@ function SearchPageContent() {
   return (
     <div>
       <Header
-        title="AI Search"
-        subtitle="Natural language business intelligence search"
+        title="AI iskanje"
+        subtitle="Iskanje poslovnih priložnosti v naravnem jeziku"
       />
 
       <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-8 max-w-5xl space-y-8">
@@ -60,7 +60,7 @@ function SearchPageContent() {
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-radar-400" />
             <span className="text-sm text-zinc-400">
-              Describe what you're looking for in plain language
+              Opišite, kaj iščete, v preprostem jeziku
             </span>
           </div>
           <SearchBar defaultValue={query} onSearch={handleSearch} />
@@ -73,7 +73,7 @@ function SearchPageContent() {
               <Sparkles className="h-3.5 w-3.5 text-violet-400 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-xs text-zinc-400 mb-2">
-                  <span className="text-violet-400 font-medium">AI interpreted:</span>{" "}
+                  <span className="text-violet-400 font-medium">AI je razumela:</span>{" "}
                   {filters.intent}
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -107,15 +107,15 @@ function SearchPageContent() {
             <div className="flex items-center gap-2 mb-4">
               <Search className="h-4 w-4 text-zinc-500" />
               <span className="text-sm text-zinc-400">
-                {results.length} results for <span className="text-white font-medium">"{query}"</span>
+                {results.length} rezultatov za <span className="text-white font-medium">"{query}"</span>
               </span>
             </div>
 
             {results.length === 0 ? (
               <div className="text-center py-20 border border-dashed border-zinc-800 rounded-xl">
                 <Search className="h-8 w-8 text-zinc-700 mx-auto mb-3" />
-                <p className="text-sm text-zinc-500">No opportunities found for this query.</p>
-                <p className="text-xs text-zinc-600 mt-1">Try different keywords or broader terms.</p>
+                <p className="text-sm text-zinc-500">Za to poizvedbo ni najdenih priložnosti.</p>
+                <p className="text-xs text-zinc-600 mt-1">Poskusite z drugimi ključnimi besedami ali širšimi izrazi.</p>
               </div>
             ) : (
               <div className="grid md:grid-cols-2 gap-4">
@@ -130,9 +130,9 @@ function SearchPageContent() {
             <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-900 border border-zinc-800 mb-4">
               <Sparkles className="h-8 w-8 text-radar-400" />
             </div>
-            <h2 className="text-lg font-semibold text-zinc-200 mb-2">AI-Powered Search</h2>
+            <h2 className="text-lg font-semibold text-zinc-200 mb-2">Iskanje z umetno inteligenco</h2>
             <p className="text-sm text-zinc-500 max-w-md mx-auto">
-              Ask in plain language. Our AI understands context and finds the most relevant business opportunities.
+              Vprašajte v preprostem jeziku. Naša umetna inteligenca razume kontekst in poišče najbolj relevantne poslovne priložnosti.
             </p>
           </div>
         )}

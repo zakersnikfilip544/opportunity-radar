@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { Header } from "@/components/dashboard/Header";
 import { OpportunityDetail } from "@/components/opportunities/OpportunityDetail";
 import { CardSkeleton } from "@/components/ui/skeleton";
+import { OPPORTUNITY_TYPE_CONFIG } from "@/types";
 import type { Opportunity } from "@/types";
 import toast from "react-hot-toast";
 
@@ -38,7 +39,7 @@ export default function OpportunityPage() {
           }
         }
       } catch {
-        toast.error("Failed to load opportunity");
+        toast.error("Nalaganje priložnosti ni uspelo");
       } finally {
         setLoading(false);
       }
@@ -48,14 +49,14 @@ export default function OpportunityPage() {
 
   function handleSave() {
     setSaved(!saved);
-    toast.success(saved ? "Removed from saved" : "Saved to your list!");
+    toast.success(saved ? "Odstranjeno iz shranjenih" : "Shranjeno na vaš seznam!");
   }
 
   return (
     <div>
       <Header
-        title={opportunity?.title || "Opportunity"}
-        subtitle={opportunity?.type?.replace(/_/g, " ")}
+        title={opportunity?.title || "Priložnost"}
+        subtitle={opportunity?.type ? OPPORTUNITY_TYPE_CONFIG[opportunity.type].label : undefined}
       />
       <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-8 max-w-5xl">
         {loading ? (
@@ -72,7 +73,7 @@ export default function OpportunityPage() {
             relatedOpportunities={related}
           />
         ) : (
-          <p className="text-center text-zinc-500 py-20">Opportunity not found.</p>
+          <p className="text-center text-zinc-500 py-20">Priložnost ni najdena.</p>
         )}
       </div>
     </div>

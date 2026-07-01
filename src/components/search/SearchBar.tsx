@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation";
 import { Search, ArrowRight, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
-const EXAMPLE_QUERIES = [
-  "Companies in Slovenia expanding production",
-  "Manufacturers hiring engineers",
-  "Solar energy investments in Europe",
-  "Tech companies receiving funding",
-  "Government tenders for construction",
-  "Startups launching new products",
+// `query` is the term actually submitted (matched against English demo data);
+// `label` is the Slovenian text shown to the user.
+const EXAMPLE_QUERIES: { label: string; query: string }[] = [
+  { label: "Podjetja v Sloveniji, ki širijo proizvodnjo", query: "Companies in Slovenia expanding production" },
+  { label: "Proizvajalci, ki zaposlujejo inženirje", query: "Manufacturers hiring engineers" },
+  { label: "Naložbe v sončno energijo v Evropi", query: "Solar energy investments in Europe" },
+  { label: "Tehnološka podjetja, ki prejemajo financiranje", query: "Tech companies receiving funding" },
+  { label: "Javni razpisi za gradbeništvo", query: "Government tenders for construction" },
+  { label: "Zagonska podjetja, ki lansirajo nove izdelke", query: "Startups launching new products" },
 ];
 
 interface SearchBarProps {
@@ -43,7 +45,7 @@ export function SearchBar({ defaultValue = "", onSearch, placeholder, inline }: 
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSubmit(query)}
-          placeholder={placeholder || "Ask anything... e.g. companies expanding in renewable energy"}
+          placeholder={placeholder || "Vprašaj karkoli ... npr. podjetja, ki širijo poslovanje na področju obnovljive energije"}
           className="w-full rounded-xl border border-zinc-700 bg-zinc-800/50 pl-11 pr-24 py-3 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-radar-500 focus:border-transparent transition-all"
         />
         <div className="absolute right-2 flex items-center gap-1">
@@ -53,24 +55,24 @@ export function SearchBar({ defaultValue = "", onSearch, placeholder, inline }: 
             className="flex items-center gap-1.5 rounded-lg bg-radar-500 hover:bg-radar-600 px-3 py-1.5 text-xs font-medium text-white transition-colors"
           >
             <Sparkles className="h-3 w-3" />
-            Search
+            Išči
           </button>
         </div>
       </div>
 
       {!inline && (
         <div className="mt-3 flex flex-wrap gap-2">
-          <span className="text-xs text-zinc-600">Try:</span>
+          <span className="text-xs text-zinc-600">Poskusi:</span>
           {EXAMPLE_QUERIES.slice(0, 3).map((q) => (
             <button
-              key={q}
+              key={q.query}
               onClick={() => {
-                setQuery(q);
-                handleSubmit(q);
+                setQuery(q.query);
+                handleSubmit(q.query);
               }}
               className="text-xs text-zinc-500 hover:text-zinc-300 underline underline-offset-2 decoration-zinc-700 transition-colors"
             >
-              {q}
+              {q.label}
             </button>
           ))}
         </div>

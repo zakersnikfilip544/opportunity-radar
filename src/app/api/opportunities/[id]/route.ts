@@ -10,7 +10,7 @@ export async function GET(
 
   if (!isSupabaseConfigured()) {
     const opp = getMockOpportunity(id);
-    if (!opp) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!opp) return NextResponse.json({ error: "Ni najdeno" }, { status: 404 });
     return NextResponse.json(opp);
   }
 
@@ -23,7 +23,7 @@ export async function GET(
     .single();
 
   if (error || !data) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: "Ni najdeno" }, { status: 404 });
   }
 
   await supabase

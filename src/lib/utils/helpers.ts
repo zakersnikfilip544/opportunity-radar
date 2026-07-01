@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { formatDistanceToNow, format, parseISO } from "date-fns";
+import { sl } from "date-fns/locale";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -8,15 +9,15 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatRelativeDate(dateStr: string): string {
   try {
-    return formatDistanceToNow(parseISO(dateStr), { addSuffix: true });
+    return formatDistanceToNow(parseISO(dateStr), { addSuffix: true, locale: sl });
   } catch {
     return dateStr;
   }
 }
 
-export function formatDate(dateStr: string, fmt = "MMM d, yyyy"): string {
+export function formatDate(dateStr: string, fmt = "d. MMM yyyy"): string {
   try {
-    return format(parseISO(dateStr), fmt);
+    return format(parseISO(dateStr), fmt, { locale: sl });
   } catch {
     return dateStr;
   }
@@ -28,7 +29,7 @@ export function formatCurrency(
   compact = false
 ): string {
   if (compact) {
-    if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(1)}B ${currency}`;
+    if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(1)} mrd ${currency}`;
     if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M ${currency}`;
     if (value >= 1_000) return `${(value / 1_000).toFixed(0)}K ${currency}`;
     return `${value} ${currency}`;
@@ -86,21 +87,21 @@ export function getFlagEmoji(countryCode: string): string {
 }
 
 const SALES_ANGLE_BY_TYPE: Record<string, string> = {
-  funding: "Fresh capital just unlocked budget — position your offer as the fastest path from funding to execution, before they build it out in-house.",
-  hiring: "A hiring wave signals a capacity gap right now — offer to bridge it while their pipeline fills.",
-  expansion: "Market-entry projects live or die on local execution details — lead with expertise they don't have in-house yet.",
-  construction: "Groundbreaking projects lock in suppliers early — get on the shortlist before procurement closes.",
-  government_tender: "Public tenders reward early, well-documented bids — offer to help shape the technical response before the deadline.",
-  acquisition: "Post-deal integration is where budgets get spent fastest — position as the team that makes it seamless.",
-  investment: "Fresh investment mandates active deployment — be the partner who helps them move quickly on the thesis.",
-  factory_expansion: "Capacity expansion needs systems and staffing that scale with it, not after it.",
-  new_product: "Launch windows are tight — offer to remove the bottleneck standing between them and ship date.",
-  technology_adoption: "Early adopters need implementation partners more than vendors — lead with hands-on delivery.",
-  energy_project: "Energy projects live and die on execution timelines — be the partner who protects the schedule.",
-  digital_transformation: "Transformation initiatives stall without outside execution capacity — offer to keep momentum going.",
-  partnership: "New partnerships need a fast integration win to prove the thesis — help them land the first one.",
-  ipo: "Pre-IPO scrutiny creates urgent compliance and reporting needs — be ready before the roadshow starts.",
-  other: "This signal points to active change inside the organization — the earlier you reach out, the more the timing works in your favor.",
+  funding: "Sveži kapital je sprostil proračun — svojo ponudbo predstavite kot najhitrejšo pot od financiranja do izvedbe, preden to zgradijo interno.",
+  hiring: "Val zaposlovanja kaže na trenutno vrzel v kapacitetah — ponudite premostitev, dokler se njihova ekipa ne zapolni.",
+  expansion: "Projekti vstopa na nov trg uspejo ali propadejo zaradi lokalnih izvedbenih podrobnosti — nastopite z znanjem, ki ga interno še nimajo.",
+  construction: "Projekti ob začetku gradnje zgodaj zaklenejo dobavitelje — uvrstite se na ožji seznam, preden se naročanje zapre.",
+  government_tender: "Javni razpisi nagradijo zgodnje, dobro dokumentirane ponudbe — ponudite pomoč pri oblikovanju tehničnega odgovora pred rokom.",
+  acquisition: "Integracija po prevzemu je faza, kjer se proračun porabi najhitreje — pozicionirajte se kot ekipa, ki to izpelje brez zapletov.",
+  investment: "Sveža naložba zahteva aktivno razporeditev sredstev — bodite partner, ki jim pomaga hitro uresničiti zastavljeno strategijo.",
+  factory_expansion: "Širitev kapacitet potrebuje sisteme in kadre, ki rastejo skupaj z njo, ne šele po njej.",
+  new_product: "Časovna okna za lansiranje so kratka — ponudite odpravo ozkega grla med njimi in datumom izdaje.",
+  technology_adoption: "Zgodnji uporabniki potrebujejo partnerje za izvedbo bolj kot dobavitelje — nastopite s praktično podporo pri implementaciji.",
+  energy_project: "Energetski projekti uspejo ali propadejo glede na časovnico izvedbe — bodite partner, ki varuje urnik.",
+  digital_transformation: "Projekti digitalne preobrazbe brez zunanje izvedbene podpore izgubijo zagon — ponudite ohranjanje tempa.",
+  partnership: "Nova partnerstva potrebujejo hitro zmago pri integraciji, da dokažejo svojo vrednost — pomagajte jim doseči prvo.",
+  ipo: "Nadzor pred prvo javno ponudbo ustvarja nujne potrebe po skladnosti in poročanju — bodite pripravljeni pred začetkom predstavitev vlagateljem.",
+  other: "Ta signal kaže na aktivno spremembo znotraj organizacije — prej ko se oglasite, bolj vam čas dela v prid.",
 };
 
 export function deriveSalesAngle(opp: { type: string }): string {
@@ -109,20 +110,20 @@ export function deriveSalesAngle(opp: { type: string }): string {
 
 const CONTACT_WINDOWS: Record<string, string[]> = {
   critical: [
-    "Today — within the next 2-3 hours, before competitors reach the same signal.",
-    "Immediately — same-day outreach is strongly recommended.",
+    "Danes — v naslednjih 2–3 urah, preden konkurenca zazna isti signal.",
+    "Takoj — priporočamo stik še isti dan.",
   ],
   high: [
-    "Within 24-48 hours. Tuesday–Thursday mornings tend to get the best response.",
-    "This week — ideally before Friday, while the news is still fresh.",
+    "V naslednjih 24–48 urah. Torkova do četrtkova dopoldneva običajno prinesejo najboljši odziv.",
+    "Ta teden — najbolje pred petkom, dokler je novica še sveža.",
   ],
   medium: [
-    "Within the next 5-7 days. Mid-week mornings (Tue–Thu, 9-11am local time) work best.",
-    "Within 1-2 weeks. Avoid Monday mornings and Friday afternoons.",
+    "V naslednjih 5–7 dneh. Sredi tedna dopoldan (tor–čet, 9.–11. ura po lokalnem času) deluje najbolje.",
+    "V naslednjih 1–2 tednih. Izogibajte se ponedeljkovim dopoldnevom in petkovim popoldnevom.",
   ],
   low: [
-    "Within the next 2-3 weeks — no immediate rush, good candidate to nurture first.",
-    "Within 30 days — add to a warm follow-up sequence.",
+    "V naslednjih 2–3 tednih — brez časovnega pritiska, dober kandidat za postopno negovanje odnosa.",
+    "V naslednjih 30 dneh — dodajte v zaporedje toplih nadaljnjih sporočil.",
   ],
 };
 
@@ -137,11 +138,11 @@ export function parseValueRange(
   max?: number,
   currency = "EUR"
 ): string {
-  if (!min && !max) return "Unknown";
+  if (!min && !max) return "Neznano";
   if (min && max) {
     return `${formatCurrency(min, currency, true)} – ${formatCurrency(max, currency, true)}`;
   }
   if (min) return `${formatCurrency(min, currency, true)}+`;
-  if (max) return `Up to ${formatCurrency(max, currency, true)}`;
-  return "Unknown";
+  if (max) return `Do ${formatCurrency(max, currency, true)}`;
+  return "Neznano";
 }

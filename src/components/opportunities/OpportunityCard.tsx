@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Bookmark, BookmarkCheck, ExternalLink, Clock, TrendingUp, ArrowUpRight } from "lucide-react";
 import { cn, formatRelativeDate, parseValueRange } from "@/lib/utils/helpers";
-import { OPPORTUNITY_TYPE_CONFIG } from "@/types";
+import { OPPORTUNITY_TYPE_CONFIG, URGENCY_CONFIG } from "@/types";
 import type { Opportunity } from "@/types";
 
 interface OpportunityCardProps {
@@ -106,7 +106,7 @@ export function OpportunityCard({ opportunity: opp, saved, onSave, compact }: Op
               <span className="text-[11px]">{typeConfig.icon}</span>
               {typeConfig.label}
             </span>
-            <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", dotClass)} title={`${opp.urgency} urgency`} />
+            <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", dotClass)} title={`${URGENCY_CONFIG[opp.urgency].label} nujnost`} />
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             {opp.opportunity_score != null && <ScorePill score={opp.opportunity_score} />}
@@ -191,7 +191,7 @@ export function OpportunityCard({ opportunity: opp, saved, onSave, compact }: Op
           "text-xs font-semibold text-radar-400 hover:text-radar-300 hover:bg-radar-500/5 transition-colors"
         )}
       >
-        View Strategy
+        Oglej si strategijo
         <ArrowUpRight className="h-3 w-3" />
       </Link>
     </div>

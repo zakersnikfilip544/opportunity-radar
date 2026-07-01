@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   const query = searchParams.get("q");
 
   if (!query || query.trim().length < 2) {
-    return NextResponse.json({ error: "Query too short" }, { status: 400 });
+    return NextResponse.json({ error: "Poizvedba je prekratka" }, { status: 400 });
   }
 
   if (!isSupabaseConfigured()) {
