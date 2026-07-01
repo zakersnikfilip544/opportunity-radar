@@ -5,8 +5,11 @@ import { useSearchParams } from "next/navigation";
 import { Header } from "@/components/dashboard/Header";
 import { OpportunityCard } from "@/components/opportunities/OpportunityCard";
 import { FilterPanel } from "@/components/opportunities/FilterPanel";
+import { ProfileSelector } from "@/components/dashboard/ProfileSelector";
+import { useRadarProfile } from "@/components/dashboard/RadarProfileContext";
 import { SearchBar } from "@/components/search/SearchBar";
 import { CardSkeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, LayoutGrid, List, X, Star, Zap, AlertTriangle } from "lucide-react";
 import { OPPORTUNITY_TYPE_CONFIG, URGENCY_CONFIG } from "@/types";
@@ -35,6 +38,7 @@ const DEFAULT_FILTERS: OpportunityFilters = { page: 1, per_page: 18, sort_by: "p
 
 function OpportunitiesContent() {
   const searchParams = useSearchParams();
+  const { profile, setProfile } = useRadarProfile();
 
   const [data, setData] = useState<PaginatedResponse<Opportunity> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,7 +56,15 @@ function OpportunitiesContent() {
     return f;
   });
 
-  const fetchOpportunities = useCallback(async (f: OpportunityFilters) => {
+  // A `?profile=` in the URL (e.g. from a dashboard "Prikaži vse" link) syncs
+  // the shared radar profile once on load.
+  useEffect(() => {
+    const urlProfile = searchParams.get("profile");
+    if (urlProfile) setProfile(urlProfile as typeof profile);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const fetchOpportunities = useCallback(async (f: OpportunityFilters, activeProfile: string, isCancelled: () => boolean) => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -68,17 +80,24 @@ function OpportunitiesContent() {
       f.country?.forEach((c) => params.append("country", c));
       f.industry?.forEach((i) => params.append("industry", i));
       f.urgency?.forEach((u) => params.append("urgency", u));
+      params.set("profile", activeProfile);
 
       const res = await fetch(`/api/opportunities?${params}`);
-      setData(await res.json());
+      const json = await res.json();
+      if (isCancelled()) return; // a newer profile/filter set was applied while this was in flight
+      setData(json);
     } catch {
-      toast.error("Nalaganje priložnosti ni uspelo");
+      if (!isCancelled()) toast.error("Nalaganje priložnosti ni uspelo");
     } finally {
-      setLoading(false);
+      if (!isCancelled()) setLoading(false);
     }
   }, []);
 
-  useEffect(() => { fetchOpportunities(filters); }, [filters, fetchOpportunities]);
+  useEffect(() => {
+    let cancelled = false;
+    fetchOpportunities(filters, profile, () => cancelled);
+    return () => { cancelled = true; };
+  }, [filters, profile, fetchOpportunities]);
 
   function handleSave(id: string) {
     setSaved((prev) => {
@@ -111,6 +130,7 @@ function OpportunitiesContent() {
   if (filters.type?.length) chips.push({ label: `Vrsta: ${filters.type.map((t) => OPPORTUNITY_TYPE_CONFIG[t as OpportunityType].label).join(", ")}`, key: "type" });
   if (filters.min_score) chips.push({ label: `Ocena ≥ ${filters.min_score}`, key: "min_score" });
   if (filters.country?.length) chips.push({ label: `Država: ${filters.country.join(", ")}`, key: "country" });
+  const hasActiveFilters = chips.length > 0;
 
   return (
     <div className="min-h-screen bg-zinc-950">
@@ -120,6 +140,9 @@ function OpportunitiesContent() {
       />
 
       <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5 max-w-7xl">
+        {/* Radar profile selector */}
+        <ProfileSelector />
+
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="w-full sm:w-auto sm:flex-1 sm:min-w-56">
@@ -225,13 +248,16 @@ function OpportunitiesContent() {
         </div>
 
         {!loading && data?.data.length === 0 && (
-          <div className="text-center py-20 border border-dashed border-zinc-800 rounded-xl">
-            <Zap className="h-7 w-7 text-zinc-700 mx-auto mb-3" />
-            <p className="text-sm text-zinc-500 mb-3">Nobena priložnost ne ustreza vašim filtrom.</p>
-            <Button variant="ghost" size="sm" onClick={() => { setActiveQuick(null); setFilters(DEFAULT_FILTERS); }}>
-              Počisti filtre
-            </Button>
-          </div>
+          <EmptyState
+            hint={hasActiveFilters ? "Poskusite počistiti filtre ali izbrati drug radar profil." : "Poskusite izbrati drug radar profil."}
+            action={
+              hasActiveFilters ? (
+                <Button variant="ghost" size="sm" onClick={() => { setActiveQuick(null); setFilters(DEFAULT_FILTERS); }}>
+                  Počisti filtre
+                </Button>
+              ) : undefined
+            }
+          />
         )}
 
         {/* Pagination */}

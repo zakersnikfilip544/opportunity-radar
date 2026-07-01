@@ -6,7 +6,10 @@ import { Header } from "@/components/dashboard/Header";
 import { SearchBar } from "@/components/search/SearchBar";
 import { OpportunityCard } from "@/components/opportunities/OpportunityCard";
 import { CardSkeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
+import { ProfileSelector } from "@/components/dashboard/ProfileSelector";
+import { useRadarProfile } from "@/components/dashboard/RadarProfileContext";
 import { Sparkles, Search } from "lucide-react";
 import type { Opportunity } from "@/types";
 import type { SearchFilters } from "@/lib/openai/analyzer";
@@ -16,6 +19,7 @@ function SearchPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const query = searchParams.get("q") || "";
+  const { profile } = useRadarProfile();
 
   const [results, setResults] = useState<Opportunity[]>([]);
   const [filters, setFilters] = useState<SearchFilters | null>(null);
@@ -23,23 +27,27 @@ function SearchPageContent() {
   const [hasSearched, setHasSearched] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     if (query) {
-      doSearch(query);
+      doSearch(query, () => cancelled);
     }
-  }, [query]);
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, profile]);
 
-  async function doSearch(q: string) {
+  async function doSearch(q: string, isCancelled: () => boolean = () => false) {
     setLoading(true);
     setHasSearched(true);
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&profile=${profile}`);
       const data = await res.json();
+      if (isCancelled()) return; // a newer query/profile was applied while this was in flight
       setResults(data.data || []);
       setFilters(data.filters || null);
     } catch {
-      toast.error("Iskanje ni uspelo");
+      if (!isCancelled()) toast.error("Iskanje ni uspelo");
     } finally {
-      setLoading(false);
+      if (!isCancelled()) setLoading(false);
     }
   }
 
@@ -55,6 +63,8 @@ function SearchPageContent() {
       />
 
       <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-8 max-w-5xl space-y-8">
+        <ProfileSelector />
+
         {/* Hero search */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
@@ -112,11 +122,10 @@ function SearchPageContent() {
             </div>
 
             {results.length === 0 ? (
-              <div className="text-center py-20 border border-dashed border-zinc-800 rounded-xl">
-                <Search className="h-8 w-8 text-zinc-700 mx-auto mb-3" />
-                <p className="text-sm text-zinc-500">Za to poizvedbo ni najdenih priložnosti.</p>
-                <p className="text-xs text-zinc-600 mt-1">Poskusite z drugimi ključnimi besedami ali širšimi izrazi.</p>
-              </div>
+              <EmptyState
+                icon={<Search className="h-8 w-8 text-zinc-700 mx-auto mb-3" />}
+                hint="Poskusite z drugimi ključnimi besedami, širšimi izrazi ali drugim radar profilom."
+              />
             ) : (
               <div className="grid md:grid-cols-2 gap-4">
                 {results.map((opp) => (

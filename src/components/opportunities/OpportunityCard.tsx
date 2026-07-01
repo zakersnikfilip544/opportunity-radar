@@ -182,9 +182,10 @@ export function OpportunityCard({ opportunity: opp, saved, onSave, compact }: Op
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="text-zinc-600 hover:text-zinc-400 transition-colors shrink-0"
+            className="flex items-center gap-1 text-zinc-600 hover:text-zinc-400 transition-colors shrink-0"
           >
-            <ExternalLink className="h-3 w-3" />
+            {opp.source_name && <span className="text-[10px] truncate max-w-[90px]">{opp.source_name}</span>}
+            <ExternalLink className="h-3 w-3 shrink-0" />
           </a>
         )}
       </div>

@@ -1,9 +1,19 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { getMockStats } from "@/lib/mock";
+import { getLiveSignalsForProfile } from "@/lib/signals/engine";
+import { buildLiveStats } from "@/lib/signals/stats";
+import { isDevFallbackEnabled } from "@/lib/signals/dev-fallback";
 
-export async function GET() {
-  if (!isSupabaseConfigured()) return NextResponse.json(getMockStats());
+export async function GET(req: NextRequest) {
+  if (!isSupabaseConfigured()) {
+    const { opportunities } = await getLiveSignalsForProfile(req.nextUrl.searchParams.get("profile") ?? undefined);
+    if (opportunities.length > 0 || !isDevFallbackEnabled()) {
+      return NextResponse.json(buildLiveStats(opportunities));
+    }
+    // Developer-only fallback: opt in locally with RADAR_DEV_FALLBACK=1.
+    return NextResponse.json(getMockStats());
+  }
 
   const supabase = createAdminClient();
 

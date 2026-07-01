@@ -4,51 +4,60 @@ import { useEffect, useState } from "react";
 import { Header } from "@/components/dashboard/Header";
 import { OpportunityCard } from "@/components/opportunities/OpportunityCard";
 import { CardSkeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
+import { ProfileSelector } from "@/components/dashboard/ProfileSelector";
+import { useRadarProfile } from "@/components/dashboard/RadarProfileContext";
 import {
-  Calendar, TrendingUp, Zap, AlertTriangle,
-  DollarSign, Target, RefreshCw, ChevronRight,
+  TrendingUp, Zap, AlertTriangle,
+  DollarSign, Target, RefreshCw,
 } from "lucide-react";
 import { OPPORTUNITY_TYPE_CONFIG } from "@/types";
 import type { DailyDigest, Opportunity, OpportunityType } from "@/types";
 import { formatDate, parseValueRange } from "@/lib/utils/helpers";
 import toast from "react-hot-toast";
-import { format } from "date-fns";
 
 type DigestData = DailyDigest & { opportunities: Opportunity[] };
 
 export default function DigestPage() {
+  const { profile } = useRadarProfile();
   const [digest, setDigest] = useState<DigestData | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
 
-  useEffect(() => { fetchDigest(); }, []);
+  useEffect(() => {
+    let cancelled = false;
+    fetchDigest(() => cancelled);
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile]);
 
-  async function fetchDigest() {
+  async function fetchDigest(isCancelled: () => boolean = () => false) {
     setLoading(true);
     try {
-      const today = format(new Date(), "yyyy-MM-dd");
-      const res = await fetch(`/api/digest?date=${today}`);
-      if (res.ok) setDigest(await res.json());
-    } catch { /* no digest yet */ }
-    finally { setLoading(false); }
+      const res = await fetch(`/api/digest?profile=${profile}`);
+      const json = res.ok ? await res.json() : null;
+      if (isCancelled()) return; // a newer profile was selected while this was in flight
+      if (json) setDigest(json);
+    } catch { /* handled by empty state below */ }
+    finally { if (!isCancelled()) setLoading(false); }
   }
 
   async function generateDigest() {
     setGenerating(true);
     try {
-      const res = await fetch("/api/digest", {
+      const res = await fetch(`/api/digest?profile=${profile}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET || "dev"}` },
       });
       if (res.ok) {
-        toast.success("Pregled je ustvarjen!");
+        toast.success("Pregled je posodobljen!");
         await fetchDigest();
       } else {
         const err = await res.json();
         toast.error(err.error || "Neuspešno");
       }
-    } catch { toast.error("Ustvarjanje pregleda ni uspelo"); }
+    } catch { toast.error("Posodabljanje pregleda ni uspelo"); }
     finally { setGenerating(false); }
   }
 
@@ -82,6 +91,8 @@ export default function DigestPage() {
       />
 
       <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-5xl space-y-8">
+        <ProfileSelector />
+
         {loading ? (
           <div className="space-y-4">
             <CardSkeleton />
@@ -90,19 +101,7 @@ export default function DigestPage() {
             </div>
           </div>
         ) : !digest ? (
-          <div className="text-center py-24 border border-dashed border-zinc-800 rounded-2xl">
-            <div className="h-14 w-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto mb-4">
-              <Calendar className="h-6 w-6 text-zinc-600" />
-            </div>
-            <h3 className="text-base font-semibold text-zinc-300 mb-2">Poročilo še ni pripravljeno</h3>
-            <p className="text-sm text-zinc-600 mb-6 max-w-xs mx-auto">
-              Ustvarite današnje vodstveno obveščevalno poročilo — izbrane priložnosti, analizirane z umetno inteligenco.
-            </p>
-            <Button variant="primary" onClick={generateDigest} loading={generating}>
-              <Zap className="h-4 w-4" />
-              Ustvari današnji pregled
-            </Button>
-          </div>
+          <EmptyState hint="Osvežite pregled ali poskusite drug radar profil." />
         ) : (
           <>
             {/* Header summary card */}
@@ -154,104 +153,110 @@ export default function DigestPage() {
               </div>
             </div>
 
-            {/* Section 1: Highest urgency */}
-            {critical.length > 0 && (
-              <section>
-                <SectionHeader
-                  icon={<AlertTriangle className="h-4 w-4 text-orange-400" />}
-                  title="Zahteva takojšnje ukrepanje"
-                  subtitle="Kritično in zelo nujno — ukrepajte v 24–48 urah"
-                  accent="text-orange-400"
-                />
-                <div className="grid md:grid-cols-2 gap-4">
-                  {critical.slice(0, 4).map((opp) => (
-                    <OpportunityCard key={opp.id} opportunity={opp} />
-                  ))}
-                </div>
-              </section>
-            )}
+            {opps.length === 0 ? (
+              <EmptyState hint="Osvežite pregled ali poskusite drug radar profil." />
+            ) : (
+              <>
+                {/* Section 1: Highest urgency */}
+                {critical.length > 0 && (
+                  <section>
+                    <SectionHeader
+                      icon={<AlertTriangle className="h-4 w-4 text-orange-400" />}
+                      title="Zahteva takojšnje ukrepanje"
+                      subtitle="Kritično in zelo nujno — ukrepajte v 24–48 urah"
+                      accent="text-orange-400"
+                    />
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {critical.slice(0, 4).map((opp) => (
+                        <OpportunityCard key={opp.id} opportunity={opp} />
+                      ))}
+                    </div>
+                  </section>
+                )}
 
-            {/* Section 2: Top 10 */}
-            <section>
-              <SectionHeader
-                icon={<TrendingUp className="h-4 w-4 text-radar-400" />}
-                title="10 najboljših priložnosti"
-                subtitle="Najbolje ocenjene priložnosti po AI relevantnosti in potencialu"
-                accent="text-radar-400"
-              />
-              <div className="grid md:grid-cols-2 gap-4">
-                {topTen.map((opp) => (
-                  <OpportunityCard key={opp.id} opportunity={opp} compact />
-                ))}
-              </div>
-            </section>
-
-            {/* Section 3: Money movement */}
-            {highValue.length > 0 && (
-              <section>
-                <SectionHeader
-                  icon={<DollarSign className="h-4 w-4 text-green-400" />}
-                  title="Denar v gibanju"
-                  subtitle="Priložnosti z znano ocenjeno vrednostjo posla, od največje naprej"
-                  accent="text-green-400"
-                />
-                <div className="grid md:grid-cols-2 gap-4">
-                  {highValue.slice(0, 4).map((opp) => (
-                    <OpportunityCard key={opp.id} opportunity={opp} />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Section 4: Full briefing */}
-            <section>
-              <SectionHeader
-                icon={<Target className="h-4 w-4 text-violet-400" />}
-                title="Celotno poročilo"
-                subtitle={`Vseh ${opps.length} priložnosti, odkritih danes`}
-                accent="text-violet-400"
-              />
-              <div className="grid md:grid-cols-2 gap-4">
-                {opps.map((opp) => (
-                  <OpportunityCard key={opp.id} opportunity={opp} compact />
-                ))}
-              </div>
-            </section>
-
-            {/* Type/country/industry breakdown */}
-            {digest.stats && (
-              <div className="grid md:grid-cols-3 gap-4 pt-2">
-                <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
-                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Po vrsti</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {Object.entries(digest.stats.by_type ?? {}).map(([type, count]) => (
-                      <span key={type} className="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-700">
-                        {OPPORTUNITY_TYPE_CONFIG[type as OpportunityType]?.label ?? type} · {count}
-                      </span>
+                {/* Section 2: Top 10 */}
+                <section>
+                  <SectionHeader
+                    icon={<TrendingUp className="h-4 w-4 text-radar-400" />}
+                    title="10 najboljših priložnosti"
+                    subtitle="Najbolje ocenjene priložnosti po AI relevantnosti in potencialu"
+                    accent="text-radar-400"
+                  />
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {topTen.map((opp) => (
+                      <OpportunityCard key={opp.id} opportunity={opp} compact />
                     ))}
                   </div>
-                </div>
-                <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
-                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Vodilne države</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {topCountries.map(([country, count]) => (
-                      <span key={country} className="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-700">
-                        {country || "Neznano"} · {count}
-                      </span>
+                </section>
+
+                {/* Section 3: Money movement */}
+                {highValue.length > 0 && (
+                  <section>
+                    <SectionHeader
+                      icon={<DollarSign className="h-4 w-4 text-green-400" />}
+                      title="Denar v gibanju"
+                      subtitle="Priložnosti z znano ocenjeno vrednostjo posla, od največje naprej"
+                      accent="text-green-400"
+                    />
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {highValue.slice(0, 4).map((opp) => (
+                        <OpportunityCard key={opp.id} opportunity={opp} />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Section 4: Full briefing */}
+                <section>
+                  <SectionHeader
+                    icon={<Target className="h-4 w-4 text-violet-400" />}
+                    title="Celotno poročilo"
+                    subtitle={`Vseh ${opps.length} priložnosti, odkritih danes`}
+                    accent="text-violet-400"
+                  />
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {opps.map((opp) => (
+                      <OpportunityCard key={opp.id} opportunity={opp} compact />
                     ))}
                   </div>
-                </div>
-                <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
-                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Vodilne panoge</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {topIndustries.map(([industry, count]) => (
-                      <span key={industry} className="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-700">
-                        {industry} · {count}
-                      </span>
-                    ))}
+                </section>
+
+                {/* Type/country/industry breakdown */}
+                {digest.stats && (
+                  <div className="grid md:grid-cols-3 gap-4 pt-2">
+                    <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
+                      <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Po vrsti</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {Object.entries(digest.stats.by_type ?? {}).filter(([, count]) => count > 0).map(([type, count]) => (
+                          <span key={type} className="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-700">
+                            {OPPORTUNITY_TYPE_CONFIG[type as OpportunityType]?.label ?? type} · {count}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
+                      <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Vodilne države</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {topCountries.map(([country, count]) => (
+                          <span key={country} className="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-700">
+                            {country || "Neznano"} · {count}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
+                      <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Vodilne panoge</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {topIndustries.map(([industry, count]) => (
+                          <span key={industry} className="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-700">
+                            {industry} · {count}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                )}
+              </>
             )}
           </>
         )}

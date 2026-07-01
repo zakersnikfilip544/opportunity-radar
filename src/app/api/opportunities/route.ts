@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { getMockOpportunities } from "@/lib/mock";
+import { getLiveSignalsForProfile } from "@/lib/signals/engine";
+import { queryOpportunities } from "@/lib/signals/query";
+import { isDevFallbackEnabled } from "@/lib/signals/dev-fallback";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -8,20 +11,29 @@ export async function GET(req: NextRequest) {
   const per_page = Math.min(parseInt(searchParams.get("per_page") || "20"), 100);
 
   if (!isSupabaseConfigured()) {
+    const filters = {
+      page,
+      per_page,
+      sort_by: searchParams.get("sort_by") ?? "published_at",
+      sort_order: searchParams.get("sort_order") ?? "desc",
+      search: searchParams.get("search") ?? undefined,
+      min_score: searchParams.get("min_score") ? parseInt(searchParams.get("min_score")!) : undefined,
+      types: searchParams.getAll("type"),
+      countries: searchParams.getAll("country"),
+      industries: searchParams.getAll("industry"),
+      urgencies: searchParams.getAll("urgency"),
+    };
+
+    const { opportunities: livePool } = await getLiveSignalsForProfile(searchParams.get("profile") ?? undefined);
+    const liveResult = queryOpportunities(livePool, filters);
+
+    if (liveResult.total > 0 || !isDevFallbackEnabled()) {
+      return NextResponse.json(liveResult);
+    }
+
+    // Developer-only fallback: opt in locally with RADAR_DEV_FALLBACK=1.
     return NextResponse.json(
-      getMockOpportunities({
-        page,
-        per_page,
-        sort_by: searchParams.get("sort_by") ?? "published_at",
-        sort_order: searchParams.get("sort_order") ?? "desc",
-        search: searchParams.get("search") ?? undefined,
-        min_score: searchParams.get("min_score") ? parseInt(searchParams.get("min_score")!) : undefined,
-        types: searchParams.getAll("type"),
-        countries: searchParams.getAll("country"),
-        industries: searchParams.getAll("industry"),
-        urgencies: searchParams.getAll("urgency"),
-        featured: searchParams.get("featured") === "true",
-      })
+      getMockOpportunities({ ...filters, featured: searchParams.get("featured") === "true" })
     );
   }
 

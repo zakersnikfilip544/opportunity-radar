@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { parseNaturalLanguageSearch } from "@/lib/openai/analyzer";
 import { searchMockOpportunities } from "@/lib/mock";
+import { getLiveSignalsForProfile } from "@/lib/signals/engine";
+import { isDevFallbackEnabled } from "@/lib/signals/dev-fallback";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -12,7 +14,25 @@ export async function GET(req: NextRequest) {
   }
 
   if (!isSupabaseConfigured()) {
-    return NextResponse.json({ data: searchMockOpportunities(query), filters: null, query });
+    const { opportunities: livePool } = await getLiveSignalsForProfile(searchParams.get("profile") ?? undefined);
+    const q = query.toLowerCase();
+    const liveMatches = livePool
+      .filter(
+        (o) =>
+          o.title.toLowerCase().includes(q) ||
+          o.summary.toLowerCase().includes(q) ||
+          o.type.includes(q) ||
+          o.company?.name.toLowerCase().includes(q) ||
+          o.tags?.some((t) => t.toLowerCase().includes(q))
+      )
+      .sort((a, b) => (b.opportunity_score ?? 0) - (a.opportunity_score ?? 0));
+
+    if (liveMatches.length > 0 || !isDevFallbackEnabled()) {
+      return NextResponse.json({ data: liveMatches, filters: null, query, live: true });
+    }
+
+    // Developer-only fallback: opt in locally with RADAR_DEV_FALLBACK=1.
+    return NextResponse.json({ data: searchMockOpportunities(query), filters: null, query, live: false });
   }
 
   const supabase = createAdminClient();

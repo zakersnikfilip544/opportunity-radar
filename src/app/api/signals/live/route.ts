@@ -1,12 +1,17 @@
-import { NextResponse } from "next/server";
-import { getLiveSlovenianSignals } from "@/lib/signals/engine";
+import { NextRequest, NextResponse } from "next/server";
+import { getLiveSignalsForProfile } from "@/lib/signals/engine";
+import { isDevFallbackEnabled } from "@/lib/signals/dev-fallback";
 import { getMockOpportunities } from "@/lib/mock";
 
-export async function GET() {
-  try {
-    const { opportunities, fetchedAt, cached } = await getLiveSlovenianSignals();
+export async function GET(req: NextRequest) {
+  const { searchParams } = req.nextUrl;
+  const profile = searchParams.get("profile") ?? undefined;
+  const force = searchParams.get("force") === "1";
 
-    if (opportunities.length > 0) {
+  try {
+    const { opportunities, fetchedAt, cached } = await getLiveSignalsForProfile(profile, { force });
+
+    if (opportunities.length > 0 || !isDevFallbackEnabled()) {
       return NextResponse.json({
         data: opportunities,
         live: true,
@@ -15,8 +20,7 @@ export async function GET() {
       });
     }
 
-    // Fallback: RSS returned nothing new right now — show mock Slovenian data
-    // so the section is never empty.
+    // Developer-only fallback: opt in locally with RADAR_DEV_FALLBACK=1.
     const fallback = getMockOpportunities({
       countries: ["Slovenia"],
       sort_by: "opportunity_score",
@@ -32,16 +36,9 @@ export async function GET() {
     });
   } catch (error) {
     console.error("[api/signals/live] Unexpected error:", error);
-    const fallback = getMockOpportunities({
-      countries: ["Slovenia"],
-      sort_by: "opportunity_score",
-      sort_order: "desc",
-      per_page: 6,
-    });
-
     return NextResponse.json({
-      data: fallback.data,
-      live: false,
+      data: [],
+      live: true,
       cached: false,
       fetched_at: new Date().toISOString(),
     });

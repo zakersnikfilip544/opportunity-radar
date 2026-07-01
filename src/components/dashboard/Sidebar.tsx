@@ -2,25 +2,39 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   Radar, LayoutDashboard, Zap, Building2,
   BookmarkCheck, Search, Calendar, Settings, Activity, X,
 } from "lucide-react";
-import { cn } from "@/lib/utils/helpers";
+import { cn, formatRelativeDate } from "@/lib/utils/helpers";
 import { useSidebar } from "./SidebarContext";
-
-const navItems = [
-  { href: "/dashboard",      label: "Nadzorna plošča", icon: LayoutDashboard, shortcut: "⌘1", stat: "Pregled" },
-  { href: "/opportunities",  label: "Priložnosti",     icon: Zap,             shortcut: "⌘2", stat: "40 skupaj" },
-  { href: "/companies",      label: "Podjetja",        icon: Building2,       shortcut: "⌘3", stat: "15 spremljanih" },
-  { href: "/search",         label: "Iskanje",         icon: Search,          shortcut: "⌘4", stat: "Z umetno inteligenco" },
-  { href: "/digest",         label: "Dnevni pregled",  icon: Calendar,        shortcut: "⌘5", stat: "Posodobljeno danes" },
-  { href: "/saved",          label: "Shranjeno",       icon: BookmarkCheck,   shortcut: "⌘6", stat: "0 shranjenih" },
-];
+import { SLOVENIAN_RSS_SOURCES } from "@/lib/signals/sources";
 
 export function Sidebar() {
   const pathname = usePathname();
   const { open, close } = useSidebar();
+  const [liveCount, setLiveCount] = useState<number | null>(null);
+  const [lastFetched, setLastFetched] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/signals/live?profile=splosno")
+      .then((r) => r.json())
+      .then((d) => {
+        setLiveCount(Array.isArray(d.data) ? d.data.length : 0);
+        setLastFetched(d.fetched_at ?? null);
+      })
+      .catch(() => { /* sidebar stats are non-critical */ });
+  }, []);
+
+  const navItems = [
+    { href: "/dashboard",      label: "Nadzorna plošča", icon: LayoutDashboard, shortcut: "⌘1", stat: "Pregled" },
+    { href: "/opportunities",  label: "Priložnosti",     icon: Zap,             shortcut: "⌘2", stat: liveCount === null ? "..." : `${liveCount} v živo` },
+    { href: "/companies",      label: "Podjetja",        icon: Building2,       shortcut: "⌘3", stat: "15 spremljanih" },
+    { href: "/search",         label: "Iskanje",         icon: Search,          shortcut: "⌘4", stat: "Z umetno inteligenco" },
+    { href: "/digest",         label: "Dnevni pregled",  icon: Calendar,        shortcut: "⌘5", stat: "Živi podatki" },
+    { href: "/saved",          label: "Shranjeno",       icon: BookmarkCheck,   shortcut: "⌘6", stat: "V cevovodu" },
+  ];
 
   return (
     <>
@@ -64,10 +78,12 @@ export function Sidebar() {
       <div className="mx-3 mt-3 mb-1 rounded-lg bg-radar-500/5 border border-radar-500/15 px-3 py-2">
         <div className="flex items-center gap-2">
           <Activity className="h-3 w-3 text-radar-400 shrink-0" />
-          <span className="text-[11px] text-zinc-400 font-medium">Pregledovanje 12 virov</span>
+          <span className="text-[11px] text-zinc-400 font-medium">Pregledovanje {SLOVENIAN_RSS_SOURCES.length} virov</span>
           <span className="ml-auto flex h-1.5 w-1.5 rounded-full bg-radar-400 animate-pulse shrink-0" />
         </div>
-        <p className="text-[10px] text-zinc-600 mt-1 pl-5">Zadnji pregled: pred 2 urama</p>
+        <p className="text-[10px] text-zinc-600 mt-1 pl-5">
+          Zadnji pregled: {lastFetched ? formatRelativeDate(lastFetched) : "..."}
+        </p>
       </div>
 
       {/* Nav */}
@@ -116,7 +132,7 @@ export function Sidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-semibold text-zinc-200 truncate">Demo uporabnik</p>
-            <p className="text-[10px] text-zinc-600 truncate">način predstavitve je aktiven</p>
+            <p className="text-[10px] text-zinc-600 truncate">živi podatki iz Slovenije</p>
           </div>
           <span className="h-2 w-2 rounded-full bg-radar-500 shrink-0" title="Povezano" />
         </div>

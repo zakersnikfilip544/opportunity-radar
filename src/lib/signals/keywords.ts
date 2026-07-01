@@ -34,6 +34,46 @@ export const SIGNAL_KEYWORD_RULES: KeywordRule[] = [
   { keyword: "odprtje", type: "expansion" },
 ];
 
+// Articles containing any of these are excluded outright, regardless of how
+// many positive keywords they also match — filters out war/politics/crime/
+// sports coverage that happens to contain a word like "razpis" or "gradnja".
+export const NEGATIVE_KEYWORDS: string[] = [
+  "nato",
+  "rusija",
+  "ukrajina",
+  "vojna",
+  "vojska",
+  "letališč",
+  "sankcije",
+  "kriminal",
+  "nesreča",
+  "smrt",
+  "šport",
+];
+
+// JS `\b` doesn't understand Slovenian diacritics (č/š/ž/ć/đ aren't "word"
+// characters by default), so plain substring matching would let e.g. "HR"
+// match inside "Hrvaška" or "gradnja" match inside "nadgradnja". This checks
+// real word boundaries by hand instead.
+const SL_WORD_CHAR = /[a-zA-ZčšžćđČŠŽĆĐ0-9]/;
+
+function includesWholeWord(haystack: string, needle: string): boolean {
+  let fromIndex = 0;
+  for (;;) {
+    const idx = haystack.indexOf(needle, fromIndex);
+    if (idx === -1) return false;
+    const before = idx > 0 ? haystack[idx - 1] : "";
+    const after = idx + needle.length < haystack.length ? haystack[idx + needle.length] : "";
+    if (!SL_WORD_CHAR.test(before) && !SL_WORD_CHAR.test(after)) return true;
+    fromIndex = idx + 1;
+  }
+}
+
+export function containsNegativeKeyword(text: string): boolean {
+  const normalized = text.toLowerCase().normalize("NFC");
+  return NEGATIVE_KEYWORDS.some((word) => includesWholeWord(normalized, word));
+}
+
 export interface DetectedSignal {
   type: OpportunityType;
   matchedKeywords: string[];
@@ -41,11 +81,17 @@ export interface DetectedSignal {
 
 /**
  * Runs every keyword rule against normalized text and returns all matches.
- * The type of the first (most specific) match becomes the signal's primary type.
+ * Rules are checked longest-phrase-first so a specific match (e.g. "nova
+ * proizvodna hala") takes priority over a shorter one it happens to contain
+ * ("gradnja" would not, but similar overlaps elsewhere do). Returns null if
+ * no rule matches, or if the text trips a negative keyword.
  */
-export function detectSignal(text: string): DetectedSignal | null {
+export function detectSignal(text: string, rules: KeywordRule[] = SIGNAL_KEYWORD_RULES): DetectedSignal | null {
+  if (containsNegativeKeyword(text)) return null;
+
   const normalized = text.toLowerCase().normalize("NFC");
-  const matches = SIGNAL_KEYWORD_RULES.filter((rule) => normalized.includes(rule.keyword));
+  const sortedRules = [...rules].sort((a, b) => b.keyword.length - a.keyword.length);
+  const matches = sortedRules.filter((rule) => includesWholeWord(normalized, rule.keyword.toLowerCase()));
   if (!matches.length) return null;
 
   return {

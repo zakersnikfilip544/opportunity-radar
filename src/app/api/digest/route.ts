@@ -2,10 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { generateDigestSummary } from "@/lib/openai/analyzer";
 import { getMockDigest } from "@/lib/mock";
+import { getLiveSignalsForProfile } from "@/lib/signals/engine";
+import { buildLiveDigest } from "@/lib/signals/digest";
+import { isDevFallbackEnabled } from "@/lib/signals/dev-fallback";
 import { format } from "date-fns";
 
 export async function GET(req: NextRequest) {
-  if (!isSupabaseConfigured()) return NextResponse.json(getMockDigest());
+  if (!isSupabaseConfigured()) {
+    const { opportunities } = await getLiveSignalsForProfile(req.nextUrl.searchParams.get("profile") ?? undefined);
+    if (opportunities.length > 0 || !isDevFallbackEnabled()) {
+      return NextResponse.json(buildLiveDigest(opportunities));
+    }
+    // Developer-only fallback: opt in locally with RADAR_DEV_FALLBACK=1.
+    return NextResponse.json(getMockDigest());
+  }
   const supabase = createAdminClient();
   const { searchParams } = req.nextUrl;
   const dateParam = searchParams.get("date") || format(new Date(), "yyyy-MM-dd");
@@ -34,8 +44,17 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  // Demo mode: no live ingestion pipeline, just return the mock digest as if regenerated
-  if (!isSupabaseConfigured()) return NextResponse.json(getMockDigest());
+  if (!isSupabaseConfigured()) {
+    // "Regenerate": bypass the cache and re-pull the live Slovenian feeds.
+    const { opportunities } = await getLiveSignalsForProfile(
+      req.nextUrl.searchParams.get("profile") ?? undefined,
+      { force: true }
+    );
+    if (opportunities.length > 0 || !isDevFallbackEnabled()) {
+      return NextResponse.json(buildLiveDigest(opportunities));
+    }
+    return NextResponse.json(getMockDigest());
+  }
 
   // Verify cron secret
   const authHeader = req.headers.get("authorization");
