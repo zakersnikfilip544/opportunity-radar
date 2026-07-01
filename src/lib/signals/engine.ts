@@ -1,7 +1,9 @@
 import { fetchFeed, type FetchedArticle } from "./fetch";
 import { SLOVENIAN_RSS_SOURCES } from "./sources";
-import { detectSignal, computeConfidenceScore, computeUrgency, extractCompanyName, RECOMMENDED_ACTION_SL } from "./keywords";
+import { detectSignal, computeUrgency, RECOMMENDED_ACTION_SL } from "./keywords";
 import { MASTER_KEYWORD_RULES, getProfile, profileMatches, type ProfileId } from "./profiles";
+import { scoreArticle, buildWhyItMatters, extractMunicipality, extractIndustry, extractCompanyEntity } from "./scoring";
+import { deduplicateOpportunities } from "./dedupe";
 import { deriveSalesAngle, deriveBestTimeToContact, slugify } from "@/lib/utils/helpers";
 import type { Opportunity } from "@/types";
 
@@ -23,30 +25,49 @@ function articleText(article: FetchedArticle): string {
 function toOpportunity(article: FetchedArticle, sourceName: string): Opportunity | null {
   if (!article.url || !article.title) return null;
 
-  const signal = detectSignal(articleText(article), MASTER_KEYWORD_RULES);
-  if (!signal) return null;
+  const text = articleText(article);
+
+  // Primary gate: weighted relevance score. Below-threshold or zero-signal
+  // articles (generic news, politics, sports, ceremonies, ...) are rejected
+  // here, before any of the more expensive extraction work below runs.
+  const scored = scoreArticle(text, article.published_at);
+  if (!scored) return null;
+
+  // Separate pass over the profile-specific keyword vocabularies (Plan B /
+  // KONEKT / Besolar) — orthogonal to relevance scoring, only used so the
+  // existing profile selector keeps filtering correctly on top of this
+  // now-much-smaller, higher-quality pool.
+  const profileSignal = detectSignal(text, MASTER_KEYWORD_RULES);
+  const matchedKeywords = [...new Set([
+    ...scored.matchedPositive.map((c) => c.concept),
+    ...(profileSignal?.matchedKeywords ?? []),
+  ])];
 
   const now = new Date().toISOString();
   const publishedAt = article.published_at ?? now;
-  const confidence = computeConfidenceScore(signal.matchedKeywords.length, publishedAt);
-  const urgency = computeUrgency(publishedAt, signal.matchedKeywords.length);
-  const companyName = extractCompanyName(articleText(article));
+  const urgency = computeUrgency(publishedAt, scored.matchedPositive.length);
+  const company = extractCompanyEntity(text, scored.type);
+  const municipality = extractMunicipality(text);
+  const industry = extractIndustry(text);
 
   const opp: Opportunity = {
     id: `live-${slugify(article.url).slice(0, 80)}`,
     title: article.title,
     summary: (article.content || article.title).slice(0, 400),
-    type: signal.type,
+    type: scored.type,
     urgency,
-    opportunity_score: confidence,
-    confidence_score: confidence,
+    opportunity_score: scored.score,
+    confidence_score: scored.confidence,
     country: "Slovenia",
+    city: municipality ?? undefined,
+    industry: industry ?? undefined,
     estimated_value_currency: "EUR",
     source_url: article.url,
     source_name: sourceName,
-    suggested_action: RECOMMENDED_ACTION_SL[signal.type],
-    tags: signal.matchedKeywords,
-    matched_keywords: signal.matchedKeywords,
+    why_it_matters: buildWhyItMatters(scored.matchedPositive, scored.type),
+    suggested_action: RECOMMENDED_ACTION_SL[scored.type],
+    tags: matchedKeywords,
+    matched_keywords: matchedKeywords,
     is_live: true,
     is_featured: false,
     is_verified: true,
@@ -59,14 +80,16 @@ function toOpportunity(article: FetchedArticle, sourceName: string): Opportunity
   opp.sales_angle = deriveSalesAngle(opp);
   opp.best_time_to_contact = deriveBestTimeToContact(opp);
 
-  if (companyName) {
-    const slug = slugify(companyName);
+  if (company) {
+    const slug = slugify(company.name);
     opp.company_id = `live-co-${slug}`;
     opp.company = {
       id: `live-co-${slug}`,
-      name: companyName,
+      name: company.name,
       slug,
       country: "Slovenia",
+      city: municipality ?? undefined,
+      industry: industry ?? undefined,
       tags: [],
       metadata: {},
       created_at: now,
@@ -85,7 +108,8 @@ async function fetchFreshSignals(): Promise<CacheEntry> {
   );
 
   const seenUrls = new Set<string>();
-  const opportunities: Opportunity[] = [];
+  const candidates: Opportunity[] = [];
+  let fetchedCount = 0;
 
   for (const result of results) {
     if (result.status !== "fulfilled") continue;
@@ -93,15 +117,26 @@ async function fetchFreshSignals(): Promise<CacheEntry> {
     for (const article of articles) {
       if (!article.url || seenUrls.has(article.url)) continue;
       seenUrls.add(article.url);
+      fetchedCount++;
       const opp = toOpportunity(article, source.name);
-      if (opp) opportunities.push(opp);
+      if (opp) candidates.push(opp);
     }
   }
 
-  opportunities.sort((a, b) => (b.opportunity_score ?? 0) - (a.opportunity_score ?? 0));
+  candidates.sort((a, b) => (b.opportunity_score ?? 0) - (a.opportunity_score ?? 0));
+
+  const { deduped, duplicatesRemoved } = deduplicateOpportunities(candidates);
+  const finalOpportunities = deduped.slice(0, MAX_RESULTS);
+
+  // Developer log — not user-facing, just for debugging feed/scoring quality.
+  console.log(
+    `[SignalEngine] Fetched: ${fetchedCount} | Accepted: ${candidates.length} | ` +
+    `Rejected: ${fetchedCount - candidates.length} | Duplicates removed: ${duplicatesRemoved} | ` +
+    `Final opportunities: ${finalOpportunities.length}`
+  );
 
   return {
-    opportunities: opportunities.slice(0, MAX_RESULTS),
+    opportunities: finalOpportunities,
     fetchedAt: new Date().toISOString(),
   };
 }

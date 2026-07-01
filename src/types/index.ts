@@ -132,6 +132,7 @@ export interface Opportunity {
   // Live signal engine
   is_live?: boolean;
   matched_keywords?: string[];
+  additional_sources?: { name: string; url: string }[];
 
   // AI outputs
   why_it_matters?: string;

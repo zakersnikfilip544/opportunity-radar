@@ -100,13 +100,6 @@ export function detectSignal(text: string, rules: KeywordRule[] = SIGNAL_KEYWORD
   };
 }
 
-export function computeConfidenceScore(matchedKeywordCount: number, publishedAt?: string): number {
-  const base = 55 + Math.min(matchedKeywordCount - 1, 3) * 12;
-  const hoursAgo = publishedAt ? (Date.now() - new Date(publishedAt).getTime()) / 3_600_000 : Infinity;
-  const recencyBonus = hoursAgo <= 24 ? 5 : 0;
-  return Math.min(98, base + recencyBonus);
-}
-
 export function computeUrgency(publishedAt: string | undefined, matchedKeywordCount: number): UrgencyLevel {
   const hoursAgo = publishedAt ? (Date.now() - new Date(publishedAt).getTime()) / 3_600_000 : Infinity;
   if (hoursAgo <= 24 && matchedKeywordCount >= 3) return "critical";

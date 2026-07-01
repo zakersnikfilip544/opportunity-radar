@@ -413,6 +413,25 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
               URL vira ni na voljo
             </span>
           )}
+          {opp.additional_sources && opp.additional_sources.length > 0 && (
+            <div className="pt-2 mt-2 border-t border-zinc-800 space-y-1.5">
+              <p className="text-[11px] text-zinc-600 uppercase tracking-wider">
+                Isto novico so poročali tudi
+              </p>
+              {opp.additional_sources.map((s) => (
+                <a
+                  key={s.url}
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-xs text-radar-400 hover:text-radar-300 transition-colors break-all"
+                >
+                  <Link2 className="h-3 w-3 shrink-0" />
+                  {s.name}
+                </a>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
