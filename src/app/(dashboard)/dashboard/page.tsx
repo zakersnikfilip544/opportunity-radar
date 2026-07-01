@@ -9,6 +9,7 @@ import {
 } from "@/components/dashboard/Charts";
 import { OpportunityCard } from "@/components/opportunities/OpportunityCard";
 import { HeroOpportunity } from "@/components/dashboard/HeroOpportunity";
+import { LiveSloveniaSection } from "@/components/dashboard/LiveSloveniaSection";
 import { CardSkeleton } from "@/components/ui/skeleton";
 import { SearchBar } from "@/components/search/SearchBar";
 import { Button } from "@/components/ui/button";
@@ -81,6 +82,9 @@ export default function DashboardPage() {
         {/* Best Opportunity Today */}
         {!loading && topOpps[0] && <HeroOpportunity opportunity={topOpps[0]} />}
         {loading && <CardSkeleton />}
+
+        {/* Live Slovenian business signals (real RSS, falls back to mock data below) */}
+        <LiveSloveniaSection />
 
         {/* Search */}
         <div className="relative rounded-xl border border-zinc-800 bg-gradient-to-r from-zinc-900 via-zinc-900/80 to-zinc-950 p-4 sm:p-5 overflow-hidden">

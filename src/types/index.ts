@@ -127,6 +127,11 @@ export interface Opportunity {
   company?: Company;
   raw_article_id?: string;
   source_url?: string;
+  source_name?: string;
+
+  // Live signal engine
+  is_live?: boolean;
+  matched_keywords?: string[];
 
   // AI outputs
   why_it_matters?: string;

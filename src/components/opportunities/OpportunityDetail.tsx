@@ -394,6 +394,9 @@ export function OpportunityDetail({ opportunity: opp, saved, onSave, relatedOppo
         </CardHeader>
         <CardContent className="space-y-2">
           <p className="text-sm text-zinc-400 leading-relaxed">{opp.title}</p>
+          {opp.source_name && (
+            <p className="text-xs text-zinc-600">Vir: {opp.source_name}</p>
+          )}
           {opp.source_url ? (
             <a
               href={opp.source_url}

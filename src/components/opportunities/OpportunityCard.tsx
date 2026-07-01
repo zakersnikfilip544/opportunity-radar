@@ -107,6 +107,12 @@ export function OpportunityCard({ opportunity: opp, saved, onSave, compact }: Op
               {typeConfig.label}
             </span>
             <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", dotClass)} title={`${URGENCY_CONFIG[opp.urgency].label} nujnost`} />
+            {opp.is_live && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-green-400 shrink-0" title="Živi signal iz slovenskih virov">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
+                V ŽIVO
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             {opp.opportunity_score != null && <ScorePill score={opp.opportunity_score} />}

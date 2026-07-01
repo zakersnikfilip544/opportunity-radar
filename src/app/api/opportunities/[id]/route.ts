@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { getMockOpportunity } from "@/lib/mock";
+import { getCachedLiveOpportunity, getLiveSlovenianSignals } from "@/lib/signals/engine";
 
 export async function GET(
   _req: NextRequest,
@@ -10,8 +11,20 @@ export async function GET(
 
   if (!isSupabaseConfigured()) {
     const opp = getMockOpportunity(id);
-    if (!opp) return NextResponse.json({ error: "Ni najdeno" }, { status: 404 });
-    return NextResponse.json(opp);
+    if (opp) return NextResponse.json(opp);
+
+    // Live signal-engine opportunities aren't in the mock DB — resolve
+    // them from the cache (or a fresh fetch if the cache is cold).
+    if (id.startsWith("live-")) {
+      const cached = getCachedLiveOpportunity(id);
+      if (cached) return NextResponse.json(cached);
+
+      const { opportunities } = await getLiveSlovenianSignals();
+      const fresh = opportunities.find((o) => o.id === id);
+      if (fresh) return NextResponse.json(fresh);
+    }
+
+    return NextResponse.json({ error: "Ni najdeno" }, { status: 404 });
   }
 
   const supabase = createAdminClient();
